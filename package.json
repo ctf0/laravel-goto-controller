@@ -1,0 +1,73 @@
+{
+    "name": "laravel-goto-controller",
+    "displayName": "Laravel goto controller",
+    "description": "Quick jump to controller",
+    "version": "0.0.1",
+    "publisher": "ctf0",
+    "engines": {
+        "vscode": "^1.41.0"
+    },
+    "repository": "https://github.com/ctf0/laravel-goto-controller",
+    "icon": "images/logo.png",
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "PHP",
+        "Laravel",
+        "goto",
+        "file navigation"
+    ],
+    "activationEvents": [
+        "onLanguage:php",
+        "onLanguage:blade",
+        "onUri",
+        "workspaceContains:**/vendor/composer/autoload_classmap.php",
+        "workspaceContains:**/artisan"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "lgc.addAppUrl",
+                "title": "Add app url to open routes urls directly in browser",
+                "category": "Laravel GoTo Controller"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Laravel Goto Controller",
+            "properties": {
+                "laravel_goto_controller.classmapfile": {
+                    "type": "string",
+                    "default": "**/vendor/composer/autoload_classmap.php",
+                    "description": "the composer classmap file path"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "yarn run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "yarn run compile",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.1.1",
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^12.11.7",
+        "@types/vscode": "^1.41.0",
+        "glob": "^7.1.5",
+        "mocha": "^6.2.2",
+        "tslint": "^5.20.0",
+        "typescript": "^3.6.4",
+        "vscode-test": "^1.2.2"
+    },
+    "dependencies": {
+        "await-exec": "^0.1.2",
+        "escape-string-regexp": "^2.0.0",
+        "fast-glob": "^3.1.1",
+        "lodash.debounce": "^4.0.8"
+    }
+}
