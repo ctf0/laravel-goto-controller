@@ -136,8 +136,8 @@ function getFileContent(file) {
 
 /* Routes ------------------------------------------------------------------- */
 const exec = require('await-exec')
-let routes_Contents = []
-let APP_URL = ''
+export let routes_Contents = []
+export let APP_URL = ''
 
 export function getRouteFilePath(text, document) {
     let info = extractController(text.replace(/['"]/g, ''))

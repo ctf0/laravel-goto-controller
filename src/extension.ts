@@ -7,6 +7,7 @@ import {
     commands
 } from 'vscode'
 import SharedLinkProvider from './providers/SharedLinkProvider'
+import RouteCompletionItemProvider from './providers/RouteCompletionItemProvider'
 import * as util from './util'
 
 const debounce = require('lodash.debounce')
@@ -81,6 +82,7 @@ function init() {
 
 function initProvider() {
     providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
+    providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()))
 }
 
 function clearAll() {
