@@ -6,8 +6,7 @@ import {
     workspace,
     commands
 } from 'vscode'
-import ControllerLinkProvider from './providers/ControllerLinkProvider'
-import RouteLinkProvider from './providers/RouteLinkProvider'
+import SharedLinkProvider from './providers/SharedLinkProvider'
 import * as util from './util'
 
 const debounce = require('lodash.debounce')
@@ -81,12 +80,12 @@ function init() {
 }
 
 function initProvider() {
-    providers.push(languages.registerDocumentLinkProvider('php', new ControllerLinkProvider()))
-    providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new RouteLinkProvider()))
+    providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
 }
 
 function clearAll() {
-    return providers.forEach((e) => e.dispose())
+    providers.map((e) => e.dispose())
+    providers = []
 }
 
 export function deactivate() {

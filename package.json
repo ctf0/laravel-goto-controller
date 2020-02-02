@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel goto controller",
     "description": "Quick jump to controller",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.41.0"
@@ -19,8 +19,6 @@
         "file navigation"
     ],
     "activationEvents": [
-        "onLanguage:php",
-        "onLanguage:blade",
         "onUri",
         "workspaceContains:**/vendor/composer/autoload_classmap.php",
         "workspaceContains:**/artisan"
@@ -30,7 +28,7 @@
         "commands": [
             {
                 "command": "lgc.addAppUrl",
-                "title": "Add app url to open routes urls directly in browser",
+                "title": "Add App Url",
                 "category": "Laravel GoTo Controller"
             }
         ],
@@ -42,6 +40,32 @@
                     "type": "string",
                     "default": "**/vendor/composer/autoload_classmap.php",
                     "description": "the composer classmap file path"
+                },
+                "laravel_goto_controller.routeMethods": {
+                    "type": "array",
+                    "default": [
+                        "route",
+                        "action",
+                        "Route::has"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "description": "routes methods to match"
+                },
+                "laravel_goto_controller.ignoreControllers": {
+                    "type": "array",
+                    "default": [
+                        "App\\\\Http\\\\Controllers\\\\Controller"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "description": "don't match this controllers classes"
                 }
             }
         }

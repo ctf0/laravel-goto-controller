@@ -11,7 +11,7 @@ import {
     EventEmitter
 } from 'vscode'
 
-const escapeStringRegexp = require('escape-string-regexp')
+export const escapeStringRegexp = require('escape-string-regexp')
 export const clearAll = new EventEmitter()
 
 /* Scroll ------------------------------------------------------------------- */
@@ -61,7 +61,7 @@ export function getControllerFilePaths(text, document) {
     let workspaceFolder = workspace.getWorkspaceFolder(document.uri).uri.fsPath
     let editor = `${env.uriScheme}://file`
 
-    let info = text.match(new RegExp(/['"](.*?)['"]/))[1]
+    let info = text.replace(/['"]/g, '')
     let controller = info
     let method = ''
 
@@ -184,8 +184,8 @@ export function getRouteFilePath(text, document) {
     // browser
     if (urlType.includes('GET') && APP_URL) {
         result.push({
-            tooltip: url,
-            fileUri: Uri.parse(`${APP_URL}/${url}`)
+            tooltip: `${APP_URL}${url}`,
+            fileUri: Uri.parse(`${APP_URL}${url}`)
         })
     }
 
@@ -219,13 +219,19 @@ export async function saveAppURL() {
     })
 
     if (APP_URL) {
+        APP_URL = APP_URL.endsWith('/') ? APP_URL : `${APP_URL}/`
         clearAll.fire()
     }
 }
 
 /* Config ------------------------------------------------------------------- */
 export let classmap_file_path
+export let ignore_Controllers
+export let route_methods
 
 export function readConfig() {
-    classmap_file_path = workspace.getConfiguration('laravel_goto_controller').classmapfile
+    let config = workspace.getConfiguration('laravel_goto_controller')
+    classmap_file_path = config.classmapfile
+    ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
+    route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
 }
