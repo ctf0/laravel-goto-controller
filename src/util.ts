@@ -25,13 +25,13 @@ export function scrollToText() {
                     .then(() => {
                         setTimeout(() => {
                             let editor = window.activeTextEditor
-                            let range = getTextPosition(query.replace('query=', ''), editor.document)
+                            let range = getTextPosition(query, editor.document)
 
                             if (range) {
                                 editor.selection = new Selection(range.start, range.end)
                                 editor.revealRange(range, 2)
                             }
-                        }, 100)
+                        }, 150)
                     })
             }
         }
@@ -79,8 +79,8 @@ export function getControllerFilePaths(text, document) {
             ? {
                 tooltip: path,
                 fileUri: Uri
-                    .parse(`${editor}${workspaceFolder}${path}?query=${method}`)
-                    .with({ authority: 'ctf0.laravel-goto-controller' })
+                    .parse(`${editor}${workspaceFolder}${path}`)
+                    .with({ authority: 'ctf0.laravel-goto-controller', query: method })
             }
             : false
     })
@@ -177,8 +177,8 @@ export function getRouteFilePath(text, document) {
     let result = [{
         tooltip: action,
         fileUri: Uri
-            .parse(`${editor}${workspaceFolder}${path}?query=${method}`)
-            .with({ authority: 'ctf0.laravel-goto-controller' })
+            .parse(`${editor}${workspaceFolder}${path}`)
+            .with({ authority: 'ctf0.laravel-goto-controller', query: method })
     }]
 
     // browser
@@ -225,9 +225,9 @@ export async function saveAppURL() {
 }
 
 /* Config ------------------------------------------------------------------- */
-export let classmap_file_path
-export let ignore_Controllers
-export let route_methods
+export let classmap_file_path: any = ''
+export let ignore_Controllers: any = ''
+export let route_methods: any = ''
 
 export function readConfig() {
     let config = workspace.getConfiguration('laravel_goto_controller')

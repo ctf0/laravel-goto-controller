@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel goto controller",
     "description": "Quick jump to controller",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.41.0"
@@ -91,7 +91,6 @@
     "dependencies": {
         "await-exec": "^0.1.2",
         "escape-string-regexp": "^2.0.0",
-        "fast-glob": "^3.1.1",
         "lodash.debounce": "^4.0.8"
     }
 }
