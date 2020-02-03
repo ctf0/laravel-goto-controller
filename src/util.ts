@@ -8,7 +8,8 @@ import {
     window,
     workspace,
     Selection,
-    EventEmitter
+    EventEmitter,
+    ProgressLocation
 } from 'vscode'
 
 export const escapeStringRegexp = require('escape-string-regexp')
@@ -30,6 +31,15 @@ export function scrollToText() {
                             if (range) {
                                 editor.selection = new Selection(range.start, range.end)
                                 editor.revealRange(range, 2)
+                            } else {
+                                window.showInformationMessage(
+                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
+                                    ...['Copy']
+                                ).then((e) => {
+                                    if (e) {
+                                        env.clipboard.writeText(query)
+                                    }
+                                })
                             }
                         }, 150)
                     })

@@ -43,7 +43,6 @@ export default class LinkProvider implements vsDocumentLinkProvider {
         return documentLinks
     }
 
-
     async forRoutes(result, doc, line, txt) {
         let documentLinks = []
 

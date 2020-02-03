@@ -16,3 +16,7 @@
 ## 0.0.4
 
 - add route completion
+
+## 0.0.5
+
+- can now copy method name if not found in the controller ex."used through a trait"
