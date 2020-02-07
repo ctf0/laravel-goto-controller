@@ -20,3 +20,7 @@
 ## 0.0.5
 
 - can now copy method name if not found in the controller ex."used through a trait"
+
+## 0.0.6
+
+- better route completion

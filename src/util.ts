@@ -8,8 +8,7 @@ import {
     window,
     workspace,
     Selection,
-    EventEmitter,
-    ProgressLocation
+    EventEmitter
 } from 'vscode'
 
 export const escapeStringRegexp = require('escape-string-regexp')

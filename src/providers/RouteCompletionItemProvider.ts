@@ -34,10 +34,12 @@ export default class CompletionItemProvider {
             url = `${this.APP_URL}${url}`
 
             let parse = Uri.parse(url)
+            let label = name.split('.').splice(0, 1).join('.') // route group name
             let string = new MarkdownString(`[${url}](command:vscode.open?${parse})`)
             string.isTrusted = true
 
             let comp = new CompletionItem(name, CompletionItemKind.Reference)
+            comp.filterText = label
             comp.commitCharacters = ['.']
             comp.detail = 'Laravel GoTo Controller'
             comp.documentation = string.appendCodeblock(`Action: ${action}\n---\nType: ${method}`)
