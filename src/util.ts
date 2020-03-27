@@ -18,30 +18,32 @@ export const clearAll = new EventEmitter()
 export function scrollToText() {
     window.registerUriHandler({
         handleUri(uri) {
-            let { authority, path, query } = uri
+            let {authority, path, query} = uri
 
             if (authority == 'ctf0.laravel-goto-controller') {
                 commands.executeCommand('vscode.openFolder', Uri.file(path))
-                    .then(() => {
-                        setTimeout(() => {
-                            let editor = window.activeTextEditor
-                            let range = getTextPosition(query, editor.document)
+                        .then(() => {
+                            setTimeout(() => {
+                                let editor = window.activeTextEditor
+                                let range = getTextPosition(query, editor.document)
 
-                            if (range) {
-                                editor.selection = new Selection(range.start, range.end)
-                                editor.revealRange(range, 2)
-                            } else {
-                                window.showInformationMessage(
-                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
-                                    ...['Copy']
-                                ).then((e) => {
-                                    if (e) {
-                                        env.clipboard.writeText(query)
-                                    }
-                                })
-                            }
-                        }, 150)
-                    })
+                                if (range) {
+                                    editor.selection = new Selection(range.start, range.end)
+                                    editor.revealRange(range, 2)
+                                }
+
+                                if (!range && query) {
+                                    window.showInformationMessage(
+                                        'Laravel Goto Controller: Copy Method Name To Clipboard',
+                                        ...['Copy']
+                                    ).then((e) => {
+                                        if (e) {
+                                            env.clipboard.writeText(query)
+                                        }
+                                    })
+                                }
+                            }, 150)
+                        })
             }
         }
     })
@@ -63,7 +65,7 @@ function getTextPosition(searchFor, doc) {
 }
 
 /* Controllers ------------------------------------------------------------------ */
-const fs = require("fs")
+const fs = require('fs')
 let classmap_fileContents = ''
 
 export function getControllerFilePaths(text, document) {
@@ -88,8 +90,8 @@ export function getControllerFilePaths(text, document) {
             ? {
                 tooltip: path,
                 fileUri: Uri
-                    .parse(`${editor}${workspaceFolder}${path}`)
-                    .with({ authority: 'ctf0.laravel-goto-controller', query: method })
+                        .parse(`${editor}${workspaceFolder}${path}`)
+                        .with({authority: 'ctf0.laravel-goto-controller', query: method})
             }
             : false
     })
@@ -155,7 +157,7 @@ export function getRouteFilePath(text, document) {
         return []
     }
 
-    let { uri: url, action, method: urlType } = info
+    let {uri: url, action, method: urlType} = info
 
     if (action == 'Closure') {
         return []
@@ -186,8 +188,8 @@ export function getRouteFilePath(text, document) {
     let result = [{
         tooltip: action,
         fileUri: Uri
-            .parse(`${editor}${workspaceFolder}${path}`)
-            .with({ authority: 'ctf0.laravel-goto-controller', query: method })
+                .parse(`${editor}${workspaceFolder}${path}`)
+                .with({authority: 'ctf0.laravel-goto-controller', query: method})
     }]
 
     // browser

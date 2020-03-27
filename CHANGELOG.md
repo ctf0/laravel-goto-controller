@@ -24,3 +24,7 @@
 ## 0.0.6
 
 - better route completion
+
+## 0.0.7
+
+- fix showing copy method notif when no method is in link
