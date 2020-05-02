@@ -22,5 +22,5 @@
 
 ### Notes
 
-- controller have to be following the [laravel convention](https://laravel.com/docs/6.x/controllers)
+- controller have to be following the [laravel convention](https://laravel.com/docs/master/controllers)
 - `Closure` routes wont have a link
