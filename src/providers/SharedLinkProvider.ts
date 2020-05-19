@@ -7,7 +7,7 @@ import {
     Position,
     window,
     Range
-} from "vscode"
+} from 'vscode'
 import * as util from '../util'
 
 export default class LinkProvider implements vsDocumentLinkProvider {
@@ -20,27 +20,31 @@ export default class LinkProvider implements vsDocumentLinkProvider {
     }
 
     async provideDocumentLinks(doc: TextDocument): Promise<DocumentLink[]> {
-        let range = window.activeTextEditor.visibleRanges[0]
-        let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"].*?['"]`, 'g')
-        let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
-        let documentLinks = []
+        let editor = window.activeTextEditor
 
-        for (let i = range.start.line; i <= range.end.line; i++) {
-            let line = doc.lineAt(i)
-            let txt = line.text
-            let result_route = txt.match(reg_route)
-            let result_controller = txt.match(reg_controller)
+        if (editor) {
+            let range = editor.visibleRanges[0]
+            let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"].*?['"]`, 'g')
+            let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
+            let documentLinks = []
 
-            if (result_route) {
-                documentLinks.push(...await this.forRoutes(result_route, doc, line, txt))
+            for (let i = range.start.line; i <= range.end.line; i++) {
+                let line = doc.lineAt(i)
+                let txt = line.text
+                let result_route = txt.match(reg_route)
+                let result_controller = txt.match(reg_controller)
+
+                if (result_route) {
+                    documentLinks.push(...await this.forRoutes(result_route, doc, line, txt))
+                }
+
+                if (result_controller) {
+                    documentLinks.push(...await this.forControllers(result_controller, doc, line, txt))
+                }
             }
 
-            if (result_controller) {
-                documentLinks.push(...await this.forControllers(result_controller, doc, line, txt))
-            }
+            return documentLinks
         }
-
-        return documentLinks
     }
 
     async forRoutes(result, doc, line, txt) {
