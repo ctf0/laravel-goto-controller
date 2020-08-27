@@ -2,10 +2,10 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "ctf0",
     "engines": {
-        "vscode": "^1.41.0"
+        "vscode": "^1.48.0"
     },
     "repository": "https://github.com/ctf0/laravel-goto-controller",
     "icon": "images/logo.png",
@@ -20,8 +20,8 @@
     ],
     "activationEvents": [
         "onUri",
-        "workspaceContains:**/vendor/composer/autoload_classmap.php",
-        "workspaceContains:**/artisan"
+        "workspaceContains:vendor/composer/autoload_classmap.php",
+        "workspaceContains:artisan"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -38,7 +38,7 @@
             "properties": {
                 "laravel_goto_controller.classmapfile": {
                     "type": "string",
-                    "default": "**/vendor/composer/autoload_classmap.php",
+                    "default": "vendor/composer/autoload_classmap.php",
                     "description": "the composer classmap file path"
                 },
                 "laravel_goto_controller.routeMethods": {
@@ -78,19 +78,19 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
-        "@types/glob": "^7.1.1",
-        "@types/mocha": "^5.2.7",
-        "@types/node": "^12.11.7",
-        "@types/vscode": "^1.41.0",
-        "glob": "^7.1.5",
-        "mocha": "^6.2.2",
-        "tslint": "^5.20.0",
-        "typescript": "^3.6.4",
-        "vscode-test": "^1.2.2"
+        "@types/glob": "^7.1.3",
+        "@types/mocha": "^8.0.3",
+        "@types/node": "^14.6.0",
+        "@types/vscode": "^1.48.0",
+        "glob": "^7.1.6",
+        "mocha": "^8.1.2",
+        "tslint": "^6.1.3",
+        "typescript": "^4.0.2",
+        "vscode-test": "^1.4.0"
     },
     "dependencies": {
         "await-exec": "^0.1.2",
-        "escape-string-regexp": "^2.0.0",
+        "escape-string-regexp": "^4.0.0",
         "lodash.debounce": "^4.0.8"
     }
 }

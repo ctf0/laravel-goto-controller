@@ -28,3 +28,8 @@
 ## 0.0.7
 
 - fix showing copy method notif when no method is in link
+
+## 0.0.9
+
+- search for required files in workspace root only instead of everywhere
+- better api

@@ -1,12 +1,12 @@
 'use strict'
 
 import {
-    DocumentLinkProvider as vsDocumentLinkProvider,
-    TextDocument,
     DocumentLink,
+    DocumentLinkProvider as vsDocumentLinkProvider,
     Position,
-    window,
-    Range
+    Range,
+    TextDocument,
+    window
 } from 'vscode'
 import * as util from '../util'
 
@@ -24,22 +24,25 @@ export default class LinkProvider implements vsDocumentLinkProvider {
 
         if (editor) {
             let range = editor.visibleRanges[0]
-            let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"].*?['"]`, 'g')
-            let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
             let documentLinks = []
 
-            for (let i = range.start.line; i <= range.end.line; i++) {
-                let line = doc.lineAt(i)
-                let txt = line.text
-                let result_route = txt.match(reg_route)
-                let result_controller = txt.match(reg_controller)
+            if (Object.entries(range).length > 0) {
+                let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"].*?['"]`, 'g')
+                let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
 
-                if (result_route) {
-                    documentLinks.push(...await this.forRoutes(result_route, doc, line, txt))
-                }
+                for (let i = range.start.line; i <= range.end.line; i++) {
+                    let line = doc.lineAt(i)
+                    let txt = line.text
+                    let result_route = txt.match(reg_route)
+                    let result_controller = txt.match(reg_controller)
 
-                if (result_controller) {
-                    documentLinks.push(...await this.forControllers(result_controller, doc, line, txt))
+                    if (result_route) {
+                        documentLinks.push(...await this.forRoutes(result_route, doc, line, txt))
+                    }
+
+                    if (result_controller) {
+                        documentLinks.push(...await this.forControllers(result_controller, doc, line, txt))
+                    }
                 }
             }
 

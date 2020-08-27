@@ -1,21 +1,21 @@
 'use strict'
 
 import {
+    commands,
     languages,
     window,
-    workspace,
-    commands
+    workspace
 } from 'vscode'
-import SharedLinkProvider from './providers/SharedLinkProvider'
 import RouteCompletionItemProvider from './providers/RouteCompletionItemProvider'
-import * as util from './util'
+import SharedLinkProvider          from './providers/SharedLinkProvider'
+import * as util                   from './util'
 
 const debounce = require('lodash.debounce')
 let providers = []
 let classmap_file
 let artisan_file
 
-export async function activate({ subscriptions }) {
+export async function activate({subscriptions}) {
     util.readConfig()
 
     // config
@@ -27,15 +27,15 @@ export async function activate({ subscriptions }) {
 
     // controllers & routes
     classmap_file = await workspace.findFiles(util.classmap_file_path, null, 1)
-    artisan_file = await workspace.findFiles('**/artisan', null, 1)
+    artisan_file = await workspace.findFiles('artisan', null, 1)
 
-    if (!classmap_file) {
-        return window.showErrorMessage('please run "composer dump" first')
-    }
+    // if (!classmap_file) {
+    //     return window.showErrorMessage('please run "composer dump" first')
+    // }
 
-    if (!artisan_file) {
-        return window.showErrorMessage('"artisan" not found')
-    }
+    // if (!artisan_file) {
+    //     return window.showErrorMessage('"artisan" not found')
+    // }
 
     classmap_file = classmap_file[0]
     artisan_file = artisan_file[0]

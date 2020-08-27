@@ -1,14 +1,14 @@
 'use strict'
 
 import {
-    Uri,
-    env,
-    Range,
     commands,
-    window,
-    workspace,
+    env,
+    EventEmitter,
+    Range,
     Selection,
-    EventEmitter
+    Uri,
+    window,
+    workspace
 } from 'vscode'
 
 export const escapeStringRegexp = require('escape-string-regexp')
@@ -22,28 +22,28 @@ export function scrollToText() {
 
             if (authority == 'ctf0.laravel-goto-controller') {
                 commands.executeCommand('vscode.openFolder', Uri.file(path))
-                        .then(() => {
-                            setTimeout(() => {
-                                let editor = window.activeTextEditor
-                                let range = getTextPosition(query, editor.document)
+                    .then(() => {
+                        setTimeout(() => {
+                            let editor = window.activeTextEditor
+                            let range = getTextPosition(query, editor.document)
 
-                                if (range) {
-                                    editor.selection = new Selection(range.start, range.end)
-                                    editor.revealRange(range, 2)
-                                }
+                            if (range) {
+                                editor.selection = new Selection(range.start, range.end)
+                                editor.revealRange(range, 2)
+                            }
 
-                                if (!range && query) {
-                                    window.showInformationMessage(
-                                        'Laravel Goto Controller: Copy Method Name To Clipboard',
-                                        ...['Copy']
-                                    ).then((e) => {
-                                        if (e) {
-                                            env.clipboard.writeText(query)
-                                        }
-                                    })
-                                }
-                            }, 150)
-                        })
+                            if (!range && query) {
+                                window.showInformationMessage(
+                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
+                                    ...['Copy']
+                                ).then((e) => {
+                                    if (e) {
+                                        env.clipboard.writeText(query)
+                                    }
+                                })
+                            }
+                        }, 150)
+                    })
             }
         }
     })
@@ -90,8 +90,8 @@ export function getControllerFilePaths(text, document) {
             ? {
                 tooltip: path,
                 fileUri: Uri
-                        .parse(`${editor}${workspaceFolder}${path}`)
-                        .with({authority: 'ctf0.laravel-goto-controller', query: method})
+                    .parse(`${editor}${workspaceFolder}${path}`)
+                    .with({authority: 'ctf0.laravel-goto-controller', query: method})
             }
             : false
     })
@@ -140,7 +140,7 @@ function getKeyLine(k) {
 }
 
 function getFileContent(file) {
-    return fs.readFile(file.path, 'utf8', (err, data) => {
+    return fs.readFile(file?.path, 'utf8', (err, data) => {
         classmap_fileContents = data
     })
 }
@@ -188,8 +188,8 @@ export function getRouteFilePath(text, document) {
     let result = [{
         tooltip: action,
         fileUri: Uri
-                .parse(`${editor}${workspaceFolder}${path}`)
-                .with({authority: 'ctf0.laravel-goto-controller', query: method})
+            .parse(`${editor}${workspaceFolder}${path}`)
+            .with({authority: 'ctf0.laravel-goto-controller', query: method})
     }]
 
     // browser
@@ -205,7 +205,7 @@ export function getRouteFilePath(text, document) {
 
 async function getRoutesInfo(file) {
     let res = await exec('php artisan route:list --columns=uri,name,action,method --json', {
-        cwd: workspace.getWorkspaceFolder(file).uri.fsPath,
+        cwd  : workspace.getWorkspaceFolder(file).uri.fsPath,
         shell: env.shell
     })
 
@@ -219,7 +219,7 @@ function extractController(k) {
 export async function saveAppURL() {
     APP_URL = await window.showInputBox({
         placeHolder: 'project APP_URL',
-        value: await env.clipboard.readText() || '',
+        value      : await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name'
@@ -231,7 +231,7 @@ export async function saveAppURL() {
 
     if (APP_URL) {
         APP_URL = APP_URL.endsWith('/') ? APP_URL : `${APP_URL}/`
-        clearAll.fire()
+        clearAll.fire(clearAll)
     }
 }
 
