@@ -24,3 +24,4 @@
 
 - controller have to be following the [laravel convention](https://laravel.com/docs/master/controllers)
 - `Closure` routes wont have a link
+- in order for controller link to redirect to the correct place, make sure the `terminal.integrated.scrollback` is set to big number ex.`10000` or even more if you have a very long list, otherwise you might get redirected to wrong controller.
