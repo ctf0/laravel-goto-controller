@@ -1,8 +1,8 @@
 'use strict'
 
 import {
-    CompletionItemKind,
     CompletionItem,
+    CompletionItemKind,
     MarkdownString,
     Uri
 } from "vscode"
@@ -11,12 +11,12 @@ import * as util from '../util'
 export default class CompletionItemProvider {
     routes_list
     route_methods
-    APP_URL
+    app_url
 
     constructor() {
-        this.APP_URL = util.APP_URL
+        this.app_url = util.app_url
         this.route_methods = util.route_methods
-        this.routes_list = util.routes_Contents.filter((e) => e.name)
+        this.routes_list = util.routes_contents.filter((e) => e.name)
     }
 
     provideCompletionItems(document, position) {
@@ -31,7 +31,7 @@ export default class CompletionItemProvider {
 
         for (const route of this.routes_list) {
             let { uri: url, name, action, method } = route
-            url = `${this.APP_URL}${url}`
+            url = `${this.app_url}${url}`
 
             let parse = Uri.parse(url)
             let label = name.split('.').splice(0, 1).join('.') // route group name

@@ -147,8 +147,8 @@ function getFileContent(file) {
 
 /* Routes ------------------------------------------------------------------- */
 const exec = require('await-exec')
-export let routes_Contents = []
-export let APP_URL = ''
+export let routes_contents = []
+export let app_url = ''
 
 export function getRouteFilePath(text, document) {
     let info = extractController(text.replace(/['"]/g, ''))
@@ -193,10 +193,10 @@ export function getRouteFilePath(text, document) {
     }]
 
     // browser
-    if (urlType.includes('GET') && APP_URL) {
+    if (urlType.includes('GET') && app_url) {
         result.push({
-            tooltip: `${APP_URL}${url}`,
-            fileUri: Uri.parse(`${APP_URL}${url}`)
+            tooltip: `${app_url}${url}`,
+            fileUri: Uri.parse(`${app_url}${url}`)
         })
     }
 
@@ -209,15 +209,15 @@ async function getRoutesInfo(file) {
         shell: env.shell
     })
 
-    routes_Contents = JSON.parse(res.stdout)
+    routes_contents = JSON.parse(res.stdout)
 }
 
 function extractController(k) {
-    return routes_Contents.find((e) => e.name == k)
+    return routes_contents.find((e) => e.name == k)
 }
 
 export async function saveAppURL() {
-    APP_URL = await window.showInputBox({
+    app_url = await window.showInputBox({
         placeHolder: 'project APP_URL',
         value      : await env.clipboard.readText() || '',
         validateInput(v) {
@@ -229,8 +229,8 @@ export async function saveAppURL() {
         }
     })
 
-    if (APP_URL) {
-        APP_URL = APP_URL.endsWith('/') ? APP_URL : `${APP_URL}/`
+    if (app_url) {
+        app_url = app_url.endsWith('/') ? app_url : `${app_url}/`
         clearAll.fire(clearAll)
     }
 }
