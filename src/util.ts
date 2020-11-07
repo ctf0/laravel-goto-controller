@@ -236,13 +236,16 @@ export async function saveAppURL() {
 }
 
 /* Config ------------------------------------------------------------------- */
-export let classmap_file_path: any = ''
-export let ignore_Controllers: any = ''
-export let route_methods: any = ''
+export let classmap_file_path: string = ''
+export let ignore_Controllers: string = ''
+export let route_methods: string = ''
+export let show_route_completion: any = ''
 
 export function readConfig() {
     let config = workspace.getConfiguration('laravel_goto_controller')
+
     classmap_file_path = config.classmapfile
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
     route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
+    show_route_completion = config.showRouteCompletion
 }

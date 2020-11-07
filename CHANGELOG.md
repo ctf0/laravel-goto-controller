@@ -33,3 +33,7 @@
 
 - search for required files in workspace root only instead of everywhere
 - better api
+
+## 0.1.0
+
+- add config to show/hide the route name suggestions

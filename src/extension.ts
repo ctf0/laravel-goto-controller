@@ -82,7 +82,10 @@ function init() {
 
 function initProvider() {
     providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
-    providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()))
+
+    if (util.show_route_completion) {
+        providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()))
+    }
 }
 
 function clearAll() {
