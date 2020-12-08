@@ -17,8 +17,8 @@ export const clearAll = new EventEmitter()
 /* Scroll ------------------------------------------------------------------- */
 export function scrollToText() {
     window.registerUriHandler({
-        handleUri(uri) {
-            let {authority, path, query} = uri
+        handleUri(provider) {
+            let {authority, path, query} = provider
 
             if (authority == 'ctf0.laravel-goto-controller') {
                 commands.executeCommand('vscode.openFolder', Uri.file(path))
@@ -69,7 +69,7 @@ const fs = require('fs')
 let classmap_fileContents = ''
 
 export function getControllerFilePaths(text, document) {
-    let workspaceFolder = workspace.getWorkspaceFolder(document.uri).uri.fsPath
+    let workspaceFolder = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
     let editor = `${env.uriScheme}://file`
 
     let info = text.replace(/['"]/g, '')
@@ -88,8 +88,8 @@ export function getControllerFilePaths(text, document) {
     return getKeyLine(controller).map((path) => {
         return path
             ? {
-                tooltip: path,
-                fileUri: Uri
+                tooltip : path,
+                fileUri : Uri
                     .parse(`${editor}${workspaceFolder}${path}`)
                     .with({authority: 'ctf0.laravel-goto-controller', query: method})
             }
@@ -163,7 +163,7 @@ export function getRouteFilePath(text, document) {
         return []
     }
 
-    let workspaceFolder = workspace.getWorkspaceFolder(document.uri).uri.fsPath
+    let workspaceFolder = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
     let editor = `${env.uriScheme}://file`
     let controller = ''
     let method = ''
@@ -186,8 +186,8 @@ export function getRouteFilePath(text, document) {
 
     // controller
     let result = [{
-        tooltip: action,
-        fileUri: Uri
+        tooltip : action,
+        fileUri : Uri
             .parse(`${editor}${workspaceFolder}${path}`)
             .with({authority: 'ctf0.laravel-goto-controller', query: method})
     }]
@@ -195,8 +195,8 @@ export function getRouteFilePath(text, document) {
     // browser
     if (urlType.includes('GET') && app_url) {
         result.push({
-            tooltip: `${app_url}${url}`,
-            fileUri: Uri.parse(`${app_url}${url}`)
+            tooltip : `${app_url}${url}`,
+            fileUri : Uri.parse(`${app_url}${url}`)
         })
     }
 
@@ -205,8 +205,8 @@ export function getRouteFilePath(text, document) {
 
 async function getRoutesInfo(file) {
     let res = await exec('php artisan route:list --columns=uri,name,action,method --json', {
-        cwd  : workspace.getWorkspaceFolder(file).uri.fsPath,
-        shell: env.shell
+        cwd   : workspace.getWorkspaceFolder(file)?.uri.fsPath,
+        shell : env.shell
     })
 
     routes_contents = JSON.parse(res.stdout)
@@ -218,8 +218,8 @@ function extractController(k) {
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder: 'project APP_URL',
-        value      : await env.clipboard.readText() || '',
+        placeHolder : 'project APP_URL',
+        value       : await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name'
@@ -236,13 +236,14 @@ export async function saveAppURL() {
 }
 
 /* Config ------------------------------------------------------------------- */
+export const PACKAGE_NAME = 'laravelGotoController'
 export let classmap_file_path: string = ''
 export let ignore_Controllers: string = ''
 export let route_methods: string = ''
 export let show_route_completion: any = ''
 
 export function readConfig() {
-    let config = workspace.getConfiguration('laravel_goto_controller')
+    let config = workspace.getConfiguration(PACKAGE_NAME)
 
     classmap_file_path = config.classmapfile
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')

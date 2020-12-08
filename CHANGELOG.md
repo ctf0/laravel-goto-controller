@@ -37,3 +37,7 @@
 ## 0.1.0
 
 - add config to show/hide the route name suggestions
+
+## 0.1.1
+
+- fix package settings name

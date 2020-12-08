@@ -27,7 +27,7 @@ export default class LinkProvider implements vsDocumentLinkProvider {
             let documentLinks = []
 
             if (Object.entries(range).length > 0) {
-                let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"].*?['"]`, 'g')
+                let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
                 let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
 
                 for (let i = range.start.line; i <= range.end.line; i++) {

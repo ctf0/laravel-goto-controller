@@ -20,7 +20,7 @@ export async function activate({subscriptions}) {
 
     // config
     workspace.onDidChangeConfiguration(async (e) => {
-        if (e.affectsConfiguration('laravel_goto_controller')) {
+        if (e.affectsConfiguration(util.PACKAGE_NAME)) {
             util.readConfig()
         }
     })
