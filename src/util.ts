@@ -203,13 +203,30 @@ export function getRouteFilePath(text, document) {
     return result
 }
 
-async function getRoutesInfo(file) {
-    let res = await exec('php artisan route:list --columns=uri,name,action,method --json', {
-        cwd   : workspace.getWorkspaceFolder(file)?.uri.fsPath,
-        shell : env.shell
-    })
+let counter = 1
 
-    routes_contents = JSON.parse(res.stdout)
+async function getRoutesInfo(file) {
+    let timer
+
+    try {
+        let res = await exec('php artisan route:list --columns=uri,name,action,method --json', {
+            cwd   : workspace.getWorkspaceFolder(file)?.uri.fsPath,
+            shell : env.shell
+        })
+
+        routes_contents = JSON.parse(res.stdout)
+    } catch (error) {
+        console.error(error)
+
+        if (counter >= 5) {
+            return clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+            counter++
+            getRoutesInfo(file)
+        }, 2000)
+    }
 }
 
 function extractController(k) {
