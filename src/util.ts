@@ -42,7 +42,7 @@ export function scrollToText() {
                                     }
                                 })
                             }
-                        }, 150)
+                        }, config.waitB4Scroll)
                     })
             }
         }
@@ -254,13 +254,14 @@ export async function saveAppURL() {
 
 /* Config ------------------------------------------------------------------- */
 export const PACKAGE_NAME = 'laravelGotoController'
+let config
 export let classmap_file_path: string = ''
 export let ignore_Controllers: string = ''
 export let route_methods: string = ''
 export let show_route_completion: any = ''
 
 export function readConfig() {
-    let config = workspace.getConfiguration(PACKAGE_NAME)
+    config = workspace.getConfiguration(PACKAGE_NAME)
 
     classmap_file_path = config.classmapfile
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')

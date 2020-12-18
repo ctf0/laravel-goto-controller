@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.51.0"
@@ -72,6 +72,11 @@
                     "minItems": 1,
                     "uniqueItems": true,
                     "description": "don't match this controllers classes"
+                },
+                "laravelGotoController.waitB4Scroll": {
+                    "type": "integer",
+                    "default": 150,
+                    "description": "time to wait until doc is ready to be searched"
                 }
             }
         }
