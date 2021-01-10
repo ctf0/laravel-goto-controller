@@ -51,7 +51,7 @@ export function scrollToText() {
 
 function getTextPosition(searchFor, doc) {
     if (searchFor) {
-        const regex = new RegExp(`function ${searchFor}`)
+        const regex = new RegExp('function ' + escapeStringRegexp(`${searchFor}(`))
         const match = regex.exec(doc.getText())
 
         if (match) {
@@ -69,7 +69,7 @@ const fs = require('fs')
 let classmap_fileContents = ''
 
 export function getControllerFilePaths(text, document) {
-    let workspaceFolder = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
+    let ws = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
     let editor = `${env.uriScheme}://file`
 
     let info = text.replace(/['"]/g, '')
@@ -90,7 +90,7 @@ export function getControllerFilePaths(text, document) {
             ? {
                 tooltip : path,
                 fileUri : Uri
-                    .parse(`${editor}${workspaceFolder}${path}`)
+                    .parse(`${editor}${ws}${path}`)
                     .with({authority: 'ctf0.laravel-goto-controller', query: method})
             }
             : false
@@ -112,7 +112,8 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
 }
 
 function getKeyLine(k) {
-    let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*`, 'gm'))
+    k = `\\${k}`
+    let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*php['"]`, 'gm'))
 
     if (match) {
         let result = []
@@ -163,7 +164,7 @@ export function getRouteFilePath(text, document) {
         return []
     }
 
-    let workspaceFolder = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
+    let ws = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
     let editor = `${env.uriScheme}://file`
     let controller = ''
     let method = ''
@@ -188,7 +189,7 @@ export function getRouteFilePath(text, document) {
     let result = [{
         tooltip : action,
         fileUri : Uri
-            .parse(`${editor}${workspaceFolder}${path}`)
+            .parse(`${editor}${ws}${path}`)
             .with({authority: 'ctf0.laravel-goto-controller', query: method})
     }]
 

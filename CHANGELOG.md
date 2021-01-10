@@ -41,3 +41,8 @@
 ## 0.1.1
 
 - fix package settings name
+
+## 0.1.4
+
+- fix showing links to controllers with partially matched names
+- fix scrolling to methods with partially matched names
