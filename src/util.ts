@@ -14,6 +14,8 @@ import {
 export const escapeStringRegexp = require('escape-string-regexp')
 export const clearAll = new EventEmitter()
 
+let ws
+
 /* Scroll ------------------------------------------------------------------- */
 export function scrollToText() {
     window.registerUriHandler({
@@ -67,34 +69,39 @@ function getTextPosition(searchFor, doc) {
 /* Controllers ------------------------------------------------------------------ */
 const fs = require('fs')
 let classmap_fileContents = ''
+let cache_store_controller = []
 
-export function getControllerFilePaths(text, document) {
-    let ws = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
+export function getControllerFilePaths(text) {
     let editor = `${env.uriScheme}://file`
-
     let info = text.replace(/['"]/g, '')
-    let controller = info
-    let method = ''
+    let list = checkCache(cache_store_controller, info)
 
-    if (info.includes('@')) {
-        let arr = info.split('@')
-        controller = arr[0]
-        method = arr[1]
-    } else {
-        let arr = info.split('\\')
-        controller = arr.pop()
-    }
+    if (!list.length) {
+        let controller
+        let method
 
-    return getKeyLine(controller).map((path) => {
-        return path
-            ? {
+        if (info.includes('@')) {
+            let arr = info.split('@')
+            controller = arr[0]
+            method = arr[1]
+        } else {
+            let arr = info.split('\\')
+            controller = arr.pop()
+        }
+
+        for (const path of getKeyLine(controller)) {
+            list.push({
                 tooltip : path,
                 fileUri : Uri
                     .parse(`${editor}${ws}${path}`)
                     .with({authority: 'ctf0.laravel-goto-controller', query: method})
-            }
-            : false
-    })
+            })
+        }
+
+        saveCache(cache_store_controller, info, list)
+    }
+
+    return list
 }
 
 export async function listenToFileChanges(classmap_file, artisan_file, debounce) {
@@ -107,12 +114,15 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
         debounce(async function (e) {
             await getFileContent(classmap_file)
             await getRoutesInfo(artisan_file)
+
+            cache_store_route = []
+            cache_store_controller = []
         }, 500)
     )
 }
 
 function getKeyLine(k) {
-    k = `\\${k}`
+    k         = `\\${k}`
     let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*php['"]`, 'gm'))
 
     if (match) {
@@ -137,7 +147,7 @@ function getKeyLine(k) {
         return result
     }
 
-    return null
+    return []
 }
 
 function getFileContent(file) {
@@ -150,58 +160,66 @@ function getFileContent(file) {
 const exec = require('await-exec')
 export let routes_contents = []
 export let app_url = ''
+let cache_store_route = []
 
-export function getRouteFilePath(text, document) {
-    let info = extractController(text.replace(/['"]/g, ''))
+export function getRouteFilePath(text) {
+    let cache_key = text.replace(/['"]/g, '')
+    let list = checkCache(cache_store_route, cache_key)
 
-    if (!info) {
-        return []
-    }
+    if (!list.length) {
+        let info = extractController(cache_key)
 
-    let {uri: url, action, method: urlType} = info
+        if (!info) {
+            return []
+        }
 
-    if (action == 'Closure') {
-        return []
-    }
+        let {uri: url, action, method: urlType} = info
 
-    let ws = workspace.getWorkspaceFolder(document.uri)?.uri.fsPath
-    let editor = `${env.uriScheme}://file`
-    let controller = ''
-    let method = ''
+        if (action == 'Closure') {
+            return []
+        }
 
-    if (action.includes('@')) {
-        let arr = action.split('@')
-        method = arr[1]
-        let namespace = arr[0].split('\\')
-        controller = namespace.pop()
-    } else {
-        let arr = action.split('\\')
-        controller = arr.pop()
-    }
+        let editor = `${env.uriScheme}://file`
+        let controller
+        let method
 
-    let path = getKeyLine(controller)[0]
+        if (action.includes('@')) {
+            let arr = action.split('@')
+            method = arr[1]
 
-    if (!path) {
-        return []
-    }
+            let namespace = arr[0].split('\\')
+            controller = namespace.pop()
+        } else {
+            let arr = action.split('\\')
+            controller = arr.pop()
+        }
 
-    // controller
-    let result = [{
-        tooltip : action,
-        fileUri : Uri
-            .parse(`${editor}${ws}${path}`)
-            .with({authority: 'ctf0.laravel-goto-controller', query: method})
-    }]
+        let path = getKeyLine(controller)[0]
 
-    // browser
-    if (urlType.includes('GET') && app_url) {
-        result.push({
-            tooltip : `${app_url}${url}`,
-            fileUri : Uri.parse(`${app_url}${url}`)
+        if (!path) {
+            return []
+        }
+
+        // controller
+        list.push({
+            tooltip : action,
+            fileUri : Uri
+                .parse(`${editor}${ws}${path}`)
+                .with({authority: 'ctf0.laravel-goto-controller', query: method})
         })
+
+        // browser
+        if (urlType.includes('GET') && app_url) {
+            list.push({
+                tooltip : `${app_url}${url}`,
+                fileUri : Uri.parse(`${app_url}${url}`)
+            })
+        }
+
+        saveCache(cache_store_route, cache_key, list)
     }
 
-    return result
+    return list
 }
 
 let counter = 1
@@ -217,9 +235,9 @@ async function getRoutesInfo(file) {
 
         routes_contents = JSON.parse(res.stdout)
     } catch (error) {
-        console.error(error)
+        // console.error(error)
 
-        if (counter >= 5) {
+        if (counter >= 3) {
             return clearTimeout(timer)
         }
 
@@ -251,6 +269,27 @@ export async function saveAppURL() {
         app_url = app_url.endsWith('/') ? app_url : `${app_url}/`
         clearAll.fire(clearAll)
     }
+}
+
+/* Helpers ------------------------------------------------------------------ */
+
+export function setWs(doc) {
+    ws = workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath
+}
+
+function checkCache(cache_store, text) {
+    let check = cache_store.find((e) => e.key == text)
+
+    return check ? check.val : []
+}
+
+function saveCache(cache_store, text, val) {
+    cache_store.push({
+        key : text,
+        val : val
+    })
+
+    return val
 }
 
 /* Config ------------------------------------------------------------------- */

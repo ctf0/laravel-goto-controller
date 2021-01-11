@@ -46,3 +46,7 @@
 
 - fix showing links to controllers with partially matched names
 - fix scrolling to methods with partially matched names
+
+## 0.1.5
+
+- things should be quicker now

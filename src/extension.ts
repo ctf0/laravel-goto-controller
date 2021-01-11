@@ -29,14 +29,6 @@ export async function activate({subscriptions}) {
     classmap_file = await workspace.findFiles(util.classmap_file_path, null, 1)
     artisan_file = await workspace.findFiles('artisan', null, 1)
 
-    // if (!classmap_file) {
-    //     return window.showErrorMessage('please run "composer dump" first')
-    // }
-
-    // if (!artisan_file) {
-    //     return window.showErrorMessage('"artisan" not found')
-    // }
-
     classmap_file = classmap_file[0]
     artisan_file = artisan_file[0]
     init()
@@ -45,33 +37,24 @@ export async function activate({subscriptions}) {
     subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL))
     util.clearAll.event(() => {
         clearAll()
-        initProvider()
+        initProviders()
     })
 }
 
 function init() {
     // links
-    setTimeout(() => {
-        if (window.activeTextEditor) {
-            initProvider()
-        }
+    if (window.activeTextEditor) {
+        initProviders()
+    }
 
-        window.onDidChangeTextEditorVisibleRanges(
-            debounce(function (e) {
-                clearAll()
-                initProvider()
-            }, 250)
-        )
-
-        window.onDidChangeActiveTextEditor(
-            debounce(function (editor) {
-                if (editor) {
-                    clearAll()
-                    initProvider()
-                }
-            }, 250)
-        )
-    }, 2000)
+    window.onDidChangeActiveTextEditor(
+        debounce(async function (editor) {
+            if (editor) {
+                await clearAll()
+                initProviders()
+            }
+        }, 250)
+    )
 
     // scroll
     util.scrollToText()
@@ -80,17 +63,23 @@ function init() {
     util.listenToFileChanges(classmap_file, artisan_file, debounce)
 }
 
-function initProvider() {
+const initProviders = debounce(function () {
     providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
 
     if (util.show_route_completion) {
         providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()))
     }
-}
+}, 250)
 
-function clearAll() {
-    providers.map((e) => e.dispose())
-    providers = []
+function clearAll () {
+    return new Promise((res, rej) => {
+        providers.map((e) => e.dispose())
+        providers = []
+
+        setTimeout(() => {
+            return res(true)
+        }, 500)
+    })
 }
 
 export function deactivate() {

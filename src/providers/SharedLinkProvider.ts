@@ -2,15 +2,14 @@
 
 import {
     DocumentLink,
-    DocumentLinkProvider as vsDocumentLinkProvider,
+    DocumentLinkProvider,
     Position,
-    Range,
     TextDocument,
     window
 } from 'vscode'
 import * as util from '../util'
 
-export default class LinkProvider implements vsDocumentLinkProvider {
+export default class LinkProvider implements DocumentLinkProvider {
     ignore_Controllers
     route_methods
 
@@ -23,78 +22,64 @@ export default class LinkProvider implements vsDocumentLinkProvider {
         let editor = window.activeTextEditor
 
         if (editor) {
-            let range = editor.visibleRanges[0]
-            let documentLinks = []
+            util.setWs(doc)
 
-            if (Object.entries(range).length > 0) {
-                let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
-                let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
+            const text = doc.getText()
+            let links = []
 
-                for (let i = range.start.line; i <= range.end.line; i++) {
-                    let line = doc.lineAt(i)
-                    let txt = line.text
-                    let result_route = txt.match(reg_route)
-                    let result_controller = txt.match(reg_controller)
+            /* Routes ------------------------------------------------------------------- */
 
-                    if (result_route) {
-                        documentLinks.push(...await this.forRoutes(result_route, doc, line, txt))
-                    }
+            let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
+            let route_matches
 
-                    if (result_controller) {
-                        documentLinks.push(...await this.forControllers(result_controller, doc, line, txt))
-                    }
-                }
-            }
+            while ((route_matches = reg_route.exec(text)) !== null) {
+                let found = route_matches[0]
+                const line = doc.lineAt(doc.positionAt(route_matches.index).line)
+                const indexOf = line.text.indexOf(found)
+                const position = new Position(line.lineNumber, indexOf)
+                const range = doc.getWordRangeAtPosition(position, new RegExp(reg_route))
 
-            return documentLinks
-        }
-    }
+                if (range) {
+                    let files: any = await util.getRouteFilePath(found)
 
-    async forRoutes(result, doc, line, txt) {
-        let documentLinks = []
-
-        for (let found of result) {
-            let files = await util.getRouteFilePath(found, doc)
-
-            if (files.length) {
-                for (const file of files) {
-                    if (file) {
-                        let start = new Position(line.lineNumber, txt.indexOf(found))
-                        let end = start.translate(0, found.length)
-
-                        let documentlink = new DocumentLink(new Range(start, end), file.fileUri)
-                        documentlink.tooltip = file.tooltip
-                        documentLinks.push(documentlink)
-                    }
-                }
-            }
-        }
-
-        return documentLinks
-    }
-
-    async forControllers(result, doc, line, txt) {
-        let documentLinks = []
-
-        for (let found of result) {
-            if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
-                let files = await util.getControllerFilePaths(found, doc)
-
-                if (files.length) {
-                    for (const file of files) {
-                        if (file) {
-                            let start = new Position(line.lineNumber, txt.indexOf(found))
-                            let end = start.translate(0, found.length)
-
-                            let documentlink = new DocumentLink(new Range(start, end), file.fileUri)
+                    if (files.length) {
+                        for (const file of files) {
+                            let documentlink = new DocumentLink(range, file.fileUri)
                             documentlink.tooltip = file.tooltip
-                            documentLinks.push(documentlink)
+
+                            links.push(documentlink)
                         }
                     }
                 }
             }
-        }
 
-        return documentLinks
+            /* Controller --------------------------------------------------------------- */
+
+            let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
+            let controller_matches
+
+            while ((controller_matches = reg_controller.exec(text)) !== null) {
+                let found = controller_matches[0]
+                const line = doc.lineAt(doc.positionAt(controller_matches.index).line)
+                const indexOf = line.text.indexOf(found)
+                const position = new Position(line.lineNumber, indexOf)
+                const range = doc.getWordRangeAtPosition(position, new RegExp(reg_controller))
+
+                if (range && !new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
+                    let files: any = await util.getControllerFilePaths(found)
+
+                    if (files.length) {
+                        for (const file of files) {
+                            let documentlink     = new DocumentLink(range, file.fileUri)
+                            documentlink.tooltip = file.tooltip
+
+                            links.push(documentlink)
+                        }
+                    }
+                }
+            }
+
+            return links
+        }
     }
 }
