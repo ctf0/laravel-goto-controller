@@ -11,63 +11,17 @@ import {
     workspace
 } from 'vscode'
 
+const fs = require('fs')
 export const escapeStringRegexp = require('escape-string-regexp')
 export const clearAll = new EventEmitter()
 
 let ws
 
-/* Scroll ------------------------------------------------------------------- */
-export function scrollToText() {
-    window.registerUriHandler({
-        handleUri(provider) {
-            let {authority, path, query} = provider
-
-            if (authority == 'ctf0.laravel-goto-controller') {
-                commands.executeCommand('vscode.openFolder', Uri.file(path))
-                    .then(() => {
-                        setTimeout(() => {
-                            let editor = window.activeTextEditor
-                            let range = getTextPosition(query, editor.document)
-
-                            if (range) {
-                                editor.selection = new Selection(range.start, range.end)
-                                editor.revealRange(range, 2)
-                            }
-
-                            if (!range && query) {
-                                window.showInformationMessage(
-                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
-                                    ...['Copy']
-                                ).then((e) => {
-                                    if (e) {
-                                        env.clipboard.writeText(query)
-                                    }
-                                })
-                            }
-                        }, config.waitB4Scroll)
-                    })
-            }
-        }
-    })
-}
-
-function getTextPosition(searchFor, doc) {
-    if (searchFor) {
-        const regex = new RegExp('function ' + escapeStringRegexp(`${searchFor}(`))
-        const match = regex.exec(doc.getText())
-
-        if (match) {
-            let pos = doc.positionAt(match.index + match[0].length)
-
-            return new Range(pos, pos)
-        }
-    }
-
-    return null
+export function setWs(uri) {
+    ws = workspace.getWorkspaceFolder(uri)?.uri.fsPath
 }
 
 /* Controllers ------------------------------------------------------------------ */
-const fs = require('fs')
 let classmap_fileContents = ''
 let cache_store_controller = []
 
@@ -271,11 +225,58 @@ export async function saveAppURL() {
     }
 }
 
-/* Helpers ------------------------------------------------------------------ */
 
-export function setWs(doc) {
-    ws = workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath
+/* Scroll ------------------------------------------------------------------- */
+export function scrollToText() {
+    window.registerUriHandler({
+        handleUri(provider) {
+            let {authority, path, query} = provider
+
+            if (authority == 'ctf0.laravel-goto-controller') {
+                commands.executeCommand('vscode.openFolder', Uri.file(path))
+                    .then(() => {
+                        setTimeout(() => {
+                            let editor = window.activeTextEditor
+                            let range = getTextPosition(query, editor.document)
+
+                            if (range) {
+                                editor.selection = new Selection(range.start, range.end)
+                                editor.revealRange(range, 2)
+                            }
+
+                            if (!range && query) {
+                                window.showInformationMessage(
+                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
+                                    ...['Copy']
+                                ).then((e) => {
+                                    if (e) {
+                                        env.clipboard.writeText(query)
+                                    }
+                                })
+                            }
+                        }, config.waitB4Scroll)
+                    })
+            }
+        }
+    })
 }
+
+function getTextPosition(searchFor, doc) {
+    if (searchFor) {
+        const regex = new RegExp('function ' + escapeStringRegexp(`${searchFor}(`))
+        const match = regex.exec(doc.getText())
+
+        if (match) {
+            let pos = doc.positionAt(match.index + match[0].length)
+
+            return new Range(pos, pos)
+        }
+    }
+
+    return null
+}
+
+/* Helpers ------------------------------------------------------------------ */
 
 function checkCache(cache_store, text) {
     let check = cache_store.find((e) => e.key == text)
@@ -284,10 +285,12 @@ function checkCache(cache_store, text) {
 }
 
 function saveCache(cache_store, text, val) {
-    cache_store.push({
-        key : text,
-        val : val
-    })
+    checkCache(cache_store, text).length
+        ? false
+        : cache_store.push({
+            key : text,
+            val : val
+        })
 
     return val
 }
@@ -298,7 +301,6 @@ let config
 export let classmap_file_path: string = ''
 export let ignore_Controllers: string = ''
 export let route_methods: string = ''
-export let show_route_completion: any = ''
 
 export function readConfig() {
     config = workspace.getConfiguration(PACKAGE_NAME)
@@ -306,5 +308,4 @@ export function readConfig() {
     classmap_file_path = config.classmapfile
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
     route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
-    show_route_completion = config.showRouteCompletion
 }

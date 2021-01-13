@@ -50,3 +50,7 @@
 ## 0.1.5
 
 - things should be quicker now
+
+## 0.2.0
+
+- remove `route name suggestions` use `https://marketplace.visualstudio.com/items?itemName=amiralizadeh9480.laravel-extra-intellisense` instead

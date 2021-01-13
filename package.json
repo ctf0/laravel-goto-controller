@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.1.5",
+    "version": "0.2.0",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.51.0"
@@ -20,8 +20,11 @@
     ],
     "activationEvents": [
         "onUri",
+        "onLanguage:php",
+        "onLanguage:blade",
         "workspaceContains:vendor/composer/autoload_classmap.php",
-        "workspaceContains:artisan"
+        "workspaceContains:artisan",
+        "onStartupFinished"
     ],
     "main": "./out/src/extension",
     "contributes": {
@@ -40,11 +43,6 @@
                     "type": "string",
                     "default": "vendor/composer/autoload_classmap.php",
                     "description": "the composer classmap file path (from project root)"
-                },
-                "laravelGotoController.showRouteCompletion": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "show route names autocomplete suggestion"
                 },
                 "laravelGotoController.routeMethods": {
                     "type": "array",

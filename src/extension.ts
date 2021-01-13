@@ -6,9 +6,8 @@ import {
     window,
     workspace
 } from 'vscode'
-import RouteCompletionItemProvider from './providers/RouteCompletionItemProvider'
-import SharedLinkProvider          from './providers/SharedLinkProvider'
-import * as util                   from './util'
+import SharedLinkProvider from './providers/SharedLinkProvider'
+import * as util          from './util'
 
 const debounce = require('lodash.debounce')
 let providers = []
@@ -31,30 +30,22 @@ export async function activate({subscriptions}) {
 
     classmap_file = classmap_file[0]
     artisan_file = artisan_file[0]
+
+    // init
     init()
 
     // route app_url
     subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL))
-    util.clearAll.event(() => {
-        clearAll()
+    util.clearAll.event(async () => {
+        await clearAll()
         initProviders()
     })
 }
 
 function init() {
     // links
-    if (window.activeTextEditor) {
-        initProviders()
-    }
-
-    window.onDidChangeActiveTextEditor(
-        debounce(async function (editor) {
-            if (editor) {
-                await clearAll()
-                initProviders()
-            }
-        }, 250)
-    )
+    initProviders()
+    window.onDidChangeActiveTextEditor((e) => initProviders())
 
     // scroll
     util.scrollToText()
@@ -65,10 +56,6 @@ function init() {
 
 const initProviders = debounce(function () {
     providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
-
-    if (util.show_route_completion) {
-        providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()))
-    }
 }, 250)
 
 function clearAll () {

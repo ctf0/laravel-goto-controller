@@ -3,7 +3,6 @@
 import {
     DocumentLink,
     DocumentLinkProvider,
-    Position,
     TextDocument,
     window
 } from 'vscode'
@@ -22,53 +21,52 @@ export default class LinkProvider implements DocumentLinkProvider {
         let editor = window.activeTextEditor
 
         if (editor) {
-            util.setWs(doc)
+            util.setWs(doc.uri)
 
             const text = doc.getText()
             let links = []
 
             /* Routes ------------------------------------------------------------------- */
 
-            let reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
-            let route_matches
+            const reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
+            let route_matches = text.matchAll(reg_route)
 
-            while ((route_matches = reg_route.exec(text)) !== null) {
-                let found = route_matches[0]
-                const line = doc.lineAt(doc.positionAt(route_matches.index).line)
-                const indexOf = line.text.indexOf(found)
-                const position = new Position(line.lineNumber, indexOf)
-                const range = doc.getWordRangeAtPosition(position, new RegExp(reg_route))
+            for (const match of route_matches) {
+                let found = match[0]
+                let files: any = await util.getRouteFilePath(found)
 
-                if (range) {
-                    let files: any = await util.getRouteFilePath(found)
+                if (files.length) {
+                    const range = doc.getWordRangeAtPosition(
+                        doc.positionAt(match.index),
+                        reg_route
+                    )
 
-                    if (files.length) {
-                        for (const file of files) {
-                            let documentlink = new DocumentLink(range, file.fileUri)
-                            documentlink.tooltip = file.tooltip
+                    for (const file of files) {
+                        let documentlink = new DocumentLink(range, file.fileUri)
+                        documentlink.tooltip = file.tooltip
 
-                            links.push(documentlink)
-                        }
+                        links.push(documentlink)
                     }
                 }
             }
 
             /* Controller --------------------------------------------------------------- */
 
-            let reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
-            let controller_matches
+            const reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
+            let controller_matches = text.matchAll(reg_controller)
 
-            while ((controller_matches = reg_controller.exec(text)) !== null) {
-                let found = controller_matches[0]
-                const line = doc.lineAt(doc.positionAt(controller_matches.index).line)
-                const indexOf = line.text.indexOf(found)
-                const position = new Position(line.lineNumber, indexOf)
-                const range = doc.getWordRangeAtPosition(position, new RegExp(reg_controller))
+            for (const match of controller_matches) {
+                let found = match[0]
 
-                if (range && !new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
+                if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
                     let files: any = await util.getControllerFilePaths(found)
 
                     if (files.length) {
+                        const range = doc.getWordRangeAtPosition(
+                            doc.positionAt(match.index),
+                            reg_controller
+                        )
+
                         for (const file of files) {
                             let documentlink     = new DocumentLink(range, file.fileUri)
                             documentlink.tooltip = file.tooltip
