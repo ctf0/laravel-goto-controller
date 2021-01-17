@@ -14,7 +14,7 @@ export default class LinkProvider implements DocumentLinkProvider {
 
     constructor() {
         this.ignore_Controllers = util.ignore_Controllers
-        this.route_methods = util.route_methods
+        this.route_methods      = util.route_methods
     }
 
     async provideDocumentLinks(doc: TextDocument): Promise<DocumentLink[]> {
@@ -24,15 +24,15 @@ export default class LinkProvider implements DocumentLinkProvider {
             util.setWs(doc.uri)
 
             const text = doc.getText()
-            let links = []
+            let links  = []
 
             /* Routes ------------------------------------------------------------------- */
 
-            const reg_route = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
+            const reg_route   = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
             let route_matches = text.matchAll(reg_route)
 
             for (const match of route_matches) {
-                let found = match[0]
+                let found      = match[0]
                 let files: any = await util.getRouteFilePath(found)
 
                 if (files.length) {
@@ -42,7 +42,7 @@ export default class LinkProvider implements DocumentLinkProvider {
                     )
 
                     for (const file of files) {
-                        let documentlink = new DocumentLink(range, file.fileUri)
+                        let documentlink     = new DocumentLink(range, file.fileUri)
                         documentlink.tooltip = file.tooltip
 
                         links.push(documentlink)
@@ -52,7 +52,7 @@ export default class LinkProvider implements DocumentLinkProvider {
 
             /* Controller --------------------------------------------------------------- */
 
-            const reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
+            const reg_controller   = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g')
             let controller_matches = text.matchAll(reg_controller)
 
             for (const match of controller_matches) {

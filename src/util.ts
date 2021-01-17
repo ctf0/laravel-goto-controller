@@ -22,24 +22,24 @@ export function setWs(uri) {
 }
 
 /* Controllers ------------------------------------------------------------------ */
-let classmap_fileContents = ''
+let classmap_fileContents  = ''
 let cache_store_controller = []
 
 export function getControllerFilePaths(text) {
     let editor = `${env.uriScheme}://file`
-    let info = text.replace(/['"]/g, '')
-    let list = checkCache(cache_store_controller, info)
+    let info   = text.replace(/['"]/g, '')
+    let list   = checkCache(cache_store_controller, info)
 
     if (!list.length) {
         let controller
         let method
 
         if (info.includes('@')) {
-            let arr = info.split('@')
+            let arr    = info.split('@')
             controller = arr[0]
-            method = arr[1]
+            method     = arr[1]
         } else {
-            let arr = info.split('\\')
+            let arr    = info.split('\\')
             controller = arr.pop()
         }
 
@@ -65,11 +65,11 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
     let watcher = workspace.createFileSystemWatcher(classmap_file_path)
 
     watcher.onDidChange(
-        debounce(async function (e) {
+        debounce(async function(e) {
             await getFileContent(classmap_file)
             await getRoutesInfo(artisan_file)
 
-            cache_store_route = []
+            cache_store_route      = []
             cache_store_controller = []
         }, 500)
     )
@@ -83,11 +83,11 @@ function getKeyLine(k) {
         let result = []
 
         for (const item of match) {
-            let line = item
+            let line      = item
             let file: any = line.match(new RegExp(/['"]\S+(?=php).*?['"]/))
 
             if (file) {
-                file = file[0].replace(/['"]/g, '')
+                file     = file[0].replace(/['"]/g, '')
                 let path = line.includes('$baseDir')
                     ? file
                     : line.includes('$vendorDir')
@@ -118,7 +118,7 @@ let cache_store_route = []
 
 export function getRouteFilePath(text) {
     let cache_key = text.replace(/['"]/g, '')
-    let list = checkCache(cache_store_route, cache_key)
+    let list      = checkCache(cache_store_route, cache_key)
 
     if (!list.length) {
         let info = extractController(cache_key)
@@ -139,12 +139,12 @@ export function getRouteFilePath(text) {
 
         if (action.includes('@')) {
             let arr = action.split('@')
-            method = arr[1]
+            method  = arr[1]
 
             let namespace = arr[0].split('\\')
-            controller = namespace.pop()
+            controller    = namespace.pop()
         } else {
-            let arr = action.split('\\')
+            let arr    = action.split('\\')
             controller = arr.pop()
         }
 
@@ -237,7 +237,7 @@ export function scrollToText() {
                     .then(() => {
                         setTimeout(() => {
                             let editor = window.activeTextEditor
-                            let range = getTextPosition(query, editor.document)
+                            let range  = getTextPosition(query, editor.document)
 
                             if (range) {
                                 editor.selection = new Selection(range.start, range.end)
@@ -307,5 +307,5 @@ export function readConfig() {
 
     classmap_file_path = config.classmapfile
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
-    route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
+    route_methods      = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
 }
