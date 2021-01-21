@@ -54,3 +54,7 @@
 ## 0.2.0
 
 - remove `route name suggestions` use `https://marketplace.visualstudio.com/items?itemName=amiralizadeh9480.laravel-extra-intellisense` instead
+
+## 0.2.2
+
+- better regex to support something like [`tenant_route($domain, 'home')`](https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect/)

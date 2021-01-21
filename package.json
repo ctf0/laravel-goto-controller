@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.51.0"
@@ -48,6 +48,7 @@
                     "type": "array",
                     "default": [
                         "route",
+                        "tenant_route",
                         "action",
                         "Route::has",
                         "Route::is"

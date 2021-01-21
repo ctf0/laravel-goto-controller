@@ -28,19 +28,25 @@ export default class LinkProvider implements DocumentLinkProvider {
 
             /* Routes ------------------------------------------------------------------- */
 
-            const reg_route   = new RegExp(`(?<=(${this.route_methods})\\()['"](.*?)['"]`, 'g')
+            const reg_route   = new RegExp(`(?<=(${this.route_methods})\\()(?:.*?)(['"](.*?)['"])`, 'g')
             let route_matches = text.matchAll(reg_route)
 
             for (const match of route_matches) {
-                let found      = match[0]
+                let prim  = match[0]
+                let found = match[2]
+                let i     = match.index
+
+                if (prim != found) {
+                    i = (i + prim.length) - found.length
+                }
+
                 let files: any = await util.getRouteFilePath(found)
+                const range    = doc.getWordRangeAtPosition(
+                    doc.positionAt(i),
+                    new RegExp(found)
+                )
 
-                if (files.length) {
-                    const range = doc.getWordRangeAtPosition(
-                        doc.positionAt(match.index),
-                        reg_route
-                    )
-
+                if (files.length && range) {
                     for (const file of files) {
                         let documentlink     = new DocumentLink(range, file.fileUri)
                         documentlink.tooltip = file.tooltip
@@ -60,13 +66,12 @@ export default class LinkProvider implements DocumentLinkProvider {
 
                 if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
                     let files: any = await util.getControllerFilePaths(found)
+                    const range    = doc.getWordRangeAtPosition(
+                        doc.positionAt(match.index),
+                        reg_controller
+                    )
 
-                    if (files.length) {
-                        const range = doc.getWordRangeAtPosition(
-                            doc.positionAt(match.index),
-                            reg_controller
-                        )
-
+                    if (files.length && range) {
                         for (const file of files) {
                             let documentlink     = new DocumentLink(range, file.fileUri)
                             documentlink.tooltip = file.tooltip
