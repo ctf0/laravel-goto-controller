@@ -11,7 +11,9 @@ import {
     workspace
 } from 'vscode'
 
-const fs = require('fs')
+const fs   = require('fs')
+const path = require('path')
+const sep  = path.sep
 export const escapeStringRegexp = require('escape-string-regexp')
 export const clearAll = new EventEmitter()
 
@@ -45,14 +47,16 @@ export function getControllerFilePaths(text) {
 
         for (const path of getKeyLine(controller)) {
             list.push({
-                tooltip : path,
+                tooltip : path.replace(/^[\\\/]/g, ''),
                 fileUri : Uri
                     .parse(`${editor}${ws}${path}`)
                     .with({authority: 'ctf0.laravel-goto-controller', query: method})
             })
         }
 
-        saveCache(cache_store_controller, info, list)
+        if (list.length) {
+            saveCache(cache_store_controller, info, list)
+        }
     }
 
     return list
@@ -91,10 +95,10 @@ function getKeyLine(k) {
                 let path = line.includes('$baseDir')
                     ? file
                     : line.includes('$vendorDir')
-                        ? `/vendor/${file}`
+                        ? `${sep}vendor${sep}${file}`
                         : null
 
-                result.push(path.replace('//', '/'))
+                result.push(path.replace(/[\\\/]+/g, sep))
             }
         }
 
@@ -105,9 +109,11 @@ function getKeyLine(k) {
 }
 
 function getFileContent(file) {
-    return fs.readFile(file?.path, 'utf8', (err, data) => {
-        classmap_fileContents = data
-    })
+    if (file) {
+        return fs.readFile(file.path, 'utf8', (err, data) => {
+            classmap_fileContents = data
+        })
+    }
 }
 
 /* Routes ------------------------------------------------------------------- */
@@ -220,7 +226,7 @@ export async function saveAppURL() {
     })
 
     if (app_url) {
-        app_url = app_url.endsWith('/') ? app_url : `${app_url}/`
+        app_url = app_url.endsWith(sep) ? app_url : `${app_url}${sep}`
         clearAll.fire(clearAll)
     }
 }

@@ -58,3 +58,7 @@
 ## 0.2.2
 
 - better regex to support something like [`tenant_route($domain, 'home')`](https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect/)
+
+## 0.2.3
+
+- fix wrong path seperator for windows

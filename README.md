@@ -18,7 +18,6 @@
 >- popup will show both the route "uri & action"
 >     - uri: will open the link in browser "if route is a **GET** && **APP_URL** was added"
 >     - action: will open the controller file
->- routes auto completion
 
 ### Notes
 
