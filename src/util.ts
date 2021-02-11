@@ -311,7 +311,7 @@ export let route_methods: string = ''
 export function readConfig() {
     config = workspace.getConfiguration(PACKAGE_NAME)
 
-    classmap_file_path = config.classmapfile
+    classmap_file_path = config.classmap_file
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
     route_methods      = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
 }

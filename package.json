@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.51.0"
@@ -39,7 +39,7 @@
             "type": "object",
             "title": "Laravel Goto Controller",
             "properties": {
-                "laravelGotoController.classmapfile": {
+                "laravelGotoController.classmap_file": {
                     "type": "string",
                     "default": "vendor/composer/autoload_classmap.php",
                     "description": "the composer classmap file path (from project root)"
