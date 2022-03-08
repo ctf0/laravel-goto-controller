@@ -7,9 +7,9 @@ import {
     workspace
 } from 'vscode'
 import SharedLinkProvider from './providers/SharedLinkProvider'
-import * as util          from './util'
+import { debounce } from 'lodash'
+import * as util from './util'
 
-const debounce = require('lodash.debounce')
 let providers  = []
 let classmap_file
 let artisan_file

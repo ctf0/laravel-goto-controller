@@ -80,7 +80,8 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
 }
 
 function getKeyLine(k) {
-    k         = `\\${k}`
+    let slash = '\\\\'
+    k         = k.includes('\\') ? k.replace(/\\/g, slash) : `${slash}${k}`
     let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*php['"]`, 'gm'))
 
     if (match) {

@@ -62,3 +62,7 @@
 ## 0.2.3
 
 - fix wrong path seperator for windows
+
+## 0.2.5
+
+- fix not working with controllers that have namespace in the name ex.`API\SomeController@action`
