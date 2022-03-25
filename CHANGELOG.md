@@ -66,3 +66,7 @@
 ## 0.2.5
 
 - fix not working with controllers that have namespace in the name ex.`API\SomeController@action`
+
+## 0.2.6
+
+- use the correct file opening command
