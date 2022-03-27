@@ -70,3 +70,7 @@
 ## 0.2.6
 
 - use the correct file opening command
+
+## 0.2.7
+
+- make sure path separators are normalized

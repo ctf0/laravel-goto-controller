@@ -46,10 +46,12 @@ export function getControllerFilePaths(text) {
         }
 
         for (const path of getKeyLine(controller)) {
+            let normalizedPath = editor + normalizePath(`${ws}${path}`)
+
             list.push({
                 tooltip : path.replace(/^[\\\/]/g, ''),
                 fileUri : Uri
-                    .parse(`${editor}${ws}${path}`)
+                    .parse(normalizedPath)
                     .with({authority: 'ctf0.laravel-goto-controller', query: method})
             })
         }
@@ -60,6 +62,13 @@ export function getControllerFilePaths(text) {
     }
 
     return list
+}
+
+function normalizePath(path)
+{
+    return path
+            .replace(/\/+/g, '/')
+            .replace(/\+/g, '\\')
 }
 
 export async function listenToFileChanges(classmap_file, artisan_file, debounce) {
@@ -161,11 +170,13 @@ export function getRouteFilePath(text) {
             return []
         }
 
+        let normalizedPath = editor + normalizePath(`${ws}${path}`)
+
         // controller
         list.push({
             tooltip : action,
             fileUri : Uri
-                .parse(`${editor}${ws}${path}`)
+                .parse(normalizedPath)
                 .with({authority: 'ctf0.laravel-goto-controller', query: method})
         })
 
