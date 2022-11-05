@@ -10,11 +10,12 @@ import {
     window,
     workspace
 } from 'vscode'
+import escapeStringRegexp from 'escape-string-regexp';
 
 const fs   = require('fs')
 const path = require('path')
 const sep  = path.sep
-export const escapeStringRegexp = require('escape-string-regexp')
+
 export const clearAll = new EventEmitter()
 
 let ws
@@ -199,8 +200,10 @@ let counter = 1
 async function getRoutesInfo(file) {
     let timer
 
+    let cmnd = `${config.phpCommand} ${config.routeListCommand}`
+
     try {
-        let res = await exec('php artisan route:list --columns=uri,name,action,method --json', {
+        let res = await exec(cmnd, {
             cwd   : workspace.getWorkspaceFolder(file)?.uri.fsPath,
             shell : env.shell
         })

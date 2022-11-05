@@ -74,3 +74,8 @@
 ## 0.2.7
 
 - make sure path separators are normalized
+
+## 0.2.8
+
+- support docker
+- support new laravel 9 routes list cmnd (check [readme](./README.md))
