@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.68.0"
@@ -32,11 +32,6 @@
                 "command": "lgc.addAppUrl",
                 "title": "Add App Url",
                 "category": "Laravel GoTo Controller"
-            },
-            {
-                "command": "lgc.openFile",
-                "title": "lgc: open file",
-                "when": "false"
             }
         ],
         "configuration": {

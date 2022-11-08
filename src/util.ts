@@ -15,7 +15,8 @@ import escapeStringRegexp from 'escape-string-regexp';
 const fs   = require('fs')
 const path = require('path')
 const sep = path.sep
-const scheme = `command:lgc.openFile`
+export const cmndName = 'lgc.openFile'
+const scheme = `command:${cmndName}`
 
 export const clearAll = new EventEmitter()
 
