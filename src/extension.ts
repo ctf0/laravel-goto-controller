@@ -36,6 +36,8 @@ export async function activate({subscriptions}) {
 
     // route app_url
     subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL))
+    subscriptions.push(commands.registerCommand('lgc.openFile', util.scrollToText))
+
     util.clearAll.event(async () => {
         await clearAll()
         initProviders()

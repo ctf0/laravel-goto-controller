@@ -14,7 +14,8 @@ import escapeStringRegexp from 'escape-string-regexp';
 
 const fs   = require('fs')
 const path = require('path')
-const sep  = path.sep
+const sep = path.sep
+const scheme = `command:lgc.openFile`
 
 export const clearAll = new EventEmitter()
 
@@ -29,7 +30,6 @@ let classmap_fileContents  = ''
 let cache_store_controller = []
 
 export function getControllerFilePaths(text) {
-    let editor = `${env.uriScheme}://file`
     let info   = text.replace(/['"]/g, '')
     let list   = checkCache(cache_store_controller, info)
 
@@ -47,13 +47,11 @@ export function getControllerFilePaths(text) {
         }
 
         for (const path of getKeyLine(controller)) {
-            let normalizedPath = editor + normalizePath(`${ws}${path}`)
+            let args = prepareArgs({ path: normalizePath(`${ws}${path}`), query: method });
 
             list.push({
                 tooltip : path.replace(/^[\\\/]/g, ''),
-                fileUri : Uri
-                    .parse(normalizedPath)
-                    .with({authority: 'ctf0.laravel-goto-controller', query: method})
+                fileUri : Uri.parse(`${scheme}?${args}`)
             })
         }
 
@@ -63,6 +61,10 @@ export function getControllerFilePaths(text) {
     }
 
     return list
+}
+
+function prepareArgs(args: object){
+    return encodeURIComponent(JSON.stringify([args]));
 }
 
 function normalizePath(path)
@@ -150,7 +152,6 @@ export function getRouteFilePath(text) {
             return []
         }
 
-        let editor = `${env.uriScheme}://file`
         let controller
         let method
 
@@ -171,14 +172,12 @@ export function getRouteFilePath(text) {
             return []
         }
 
-        let normalizedPath = editor + normalizePath(`${ws}${path}`)
+        let args = prepareArgs({ path: normalizePath(`${ws}${path}`), query: method });
 
         // controller
         list.push({
             tooltip : action,
-            fileUri : Uri
-                .parse(normalizedPath)
-                .with({authority: 'ctf0.laravel-goto-controller', query: method})
+            fileUri : Uri.parse(`${scheme}?${args}`)
         })
 
         // browser
@@ -248,38 +247,34 @@ export async function saveAppURL() {
 
 
 /* Scroll ------------------------------------------------------------------- */
-export function scrollToText() {
-    window.registerUriHandler({
-        handleUri(provider) {
-            let {authority, path, query} = provider
+export function scrollToText(args) {
+    if (args !== undefined) {
+        let {path, query} = args
 
-            if (authority == 'ctf0.laravel-goto-controller') {
-                commands.executeCommand('vscode.open', Uri.file(path))
-                    .then(() => {
-                        setTimeout(() => {
-                            let editor = window.activeTextEditor
-                            let range  = getTextPosition(query, editor.document)
+        commands.executeCommand('vscode.open', Uri.file(path))
+            .then(() => {
+                setTimeout(() => {
+                    let editor = window.activeTextEditor
+                    let range  = getTextPosition(query, editor.document)
 
-                            if (range) {
-                                editor.selection = new Selection(range.start, range.end)
-                                editor.revealRange(range, 2)
+                    if (range) {
+                        editor.selection = new Selection(range.start, range.end)
+                        editor.revealRange(range, 2)
+                    }
+
+                    if (!range && query) {
+                        window.showInformationMessage(
+                            'Laravel Goto Controller: Copy Method Name To Clipboard',
+                            ...['Copy']
+                        ).then((e) => {
+                            if (e) {
+                                env.clipboard.writeText(query)
                             }
-
-                            if (!range && query) {
-                                window.showInformationMessage(
-                                    'Laravel Goto Controller: Copy Method Name To Clipboard',
-                                    ...['Copy']
-                                ).then((e) => {
-                                    if (e) {
-                                        env.clipboard.writeText(query)
-                                    }
-                                })
-                            }
-                        }, config.waitB4Scroll)
-                    })
-            }
-        }
-    })
+                        })
+                    }
+                }, config.waitB4Scroll)
+            })
+    }
 }
 
 function getTextPosition(searchFor, doc) {

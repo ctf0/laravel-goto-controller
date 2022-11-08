@@ -79,3 +79,8 @@
 
 - support docker
 - support new laravel 9 routes list cmnd (check [readme](./README.md))
+
+## 0.3.0
+
+- fix link popup not being clickable
+- use a cmnd instead of the uri handler

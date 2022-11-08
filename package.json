@@ -2,10 +2,10 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.2.8",
+    "version": "0.3.0",
     "publisher": "ctf0",
     "engines": {
-        "vscode": "^1.51.0"
+        "vscode": "^1.68.0"
     },
     "repository": "https://github.com/ctf0/laravel-goto-controller",
     "icon": "images/logo.png",
@@ -22,7 +22,6 @@
         "onUri",
         "onLanguage:php",
         "onLanguage:blade",
-        "workspaceContains:vendor/composer/autoload_classmap.php",
         "workspaceContains:artisan",
         "onStartupFinished"
     ],
@@ -33,6 +32,11 @@
                 "command": "lgc.addAppUrl",
                 "title": "Add App Url",
                 "category": "Laravel GoTo Controller"
+            },
+            {
+                "command": "lgc.openFile",
+                "title": "lgc: open file",
+                "when": "false"
             }
         ],
         "configuration": {
@@ -101,7 +105,7 @@
     "devDependencies": {
         "@types/glob": "^8.0.0",
         "@types/node": "^18.11.9",
-        "@types/vscode": "^1.51.0",
+        "@types/vscode": "^1.68.0",
         "esbuild": "^0.15.13",
         "glob": "^8.0.3",
         "tslint": "^6.1.3",

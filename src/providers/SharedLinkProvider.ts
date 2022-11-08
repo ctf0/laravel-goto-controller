@@ -67,9 +67,9 @@ export default class LinkProvider implements DocumentLinkProvider {
                 if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
                     let files: any = await util.getControllerFilePaths(found)
                     const range    = doc.getWordRangeAtPosition(
-                        doc.positionAt(match.index),
-                        reg_controller
-                    )
+                                        doc.positionAt(match.index),
+                                        reg_controller
+                                    )
 
                     if (files.length && range) {
                         for (const file of files) {
