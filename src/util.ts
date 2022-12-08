@@ -1,18 +1,20 @@
 'use strict'
 
+import escapeStringRegexp from 'escape-string-regexp';
 import {
     commands,
+    DocumentSymbol,
     env,
     EventEmitter,
-    Range,
     Selection,
+    SymbolKind,
+    TextEditorRevealType,
     Uri,
     window,
     workspace
-} from 'vscode'
-import escapeStringRegexp from 'escape-string-regexp';
+} from 'vscode';
 
-const fs   = require('fs')
+const fs = require('fs')
 const path = require('path')
 const sep = path.sep
 export const cmndName = 'lgc.openFile'
@@ -27,23 +29,23 @@ export function setWs(uri) {
 }
 
 /* Controllers ------------------------------------------------------------------ */
-let classmap_fileContents  = ''
+let classmap_fileContents = ''
 let cache_store_controller = []
 
 export function getControllerFilePaths(text) {
-    let info   = text.replace(/['"]/g, '')
-    let list   = checkCache(cache_store_controller, info)
+    let info = text.replace(/['"]/g, '')
+    let list = checkCache(cache_store_controller, info)
 
     if (!list.length) {
         let controller
         let method
 
         if (info.includes('@')) {
-            let arr    = info.split('@')
+            let arr = info.split('@')
             controller = arr[0]
-            method     = arr[1]
+            method = arr[1]
         } else {
-            let arr    = info.split('\\')
+            let arr = info.split('\\')
             controller = arr.pop()
         }
 
@@ -51,8 +53,8 @@ export function getControllerFilePaths(text) {
             let args = prepareArgs({ path: normalizePath(`${ws}${path}`), query: method });
 
             list.push({
-                tooltip : path.replace(/^[\\\/]/g, ''),
-                fileUri : Uri.parse(`${scheme}?${args}`)
+                tooltip: path.replace(/^[\\\/]/g, ''),
+                fileUri: Uri.parse(`${scheme}?${args}`)
             })
         }
 
@@ -64,15 +66,14 @@ export function getControllerFilePaths(text) {
     return list
 }
 
-function prepareArgs(args: object){
+function prepareArgs(args: object) {
     return encodeURIComponent(JSON.stringify([args]));
 }
 
-function normalizePath(path)
-{
+function normalizePath(path) {
     return path
-            .replace(/\/+/g, '/')
-            .replace(/\+/g, '\\')
+        .replace(/\/+/g, '/')
+        .replace(/\+/g, '\\')
 }
 
 export async function listenToFileChanges(classmap_file, artisan_file, debounce) {
@@ -82,11 +83,11 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
     let watcher = workspace.createFileSystemWatcher(classmap_file_path)
 
     watcher.onDidChange(
-        debounce(async function(e) {
+        debounce(async function (e) {
             await getFileContent(classmap_file)
             await getRoutesInfo(artisan_file)
 
-            cache_store_route      = []
+            cache_store_route = []
             cache_store_controller = []
         }, 500)
     )
@@ -94,18 +95,18 @@ export async function listenToFileChanges(classmap_file, artisan_file, debounce)
 
 function getKeyLine(k) {
     let slash = '\\\\'
-    k         = k.includes('\\') ? k.replace(/\\/g, slash) : `${slash}${k}`
+    k = k.includes('\\') ? k.replace(/\\/g, slash) : `${slash}${k}`
     let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*php['"]`, 'gm'))
 
     if (match) {
         let result = []
 
         for (const item of match) {
-            let line      = item
+            let line = item
             let file: any = line.match(new RegExp(/['"]\S+(?=php).*?['"]/))
 
             if (file) {
-                file     = file[0].replace(/['"]/g, '')
+                file = file[0].replace(/['"]/g, '')
                 let path = line.includes('$baseDir')
                     ? file
                     : line.includes('$vendorDir')
@@ -138,7 +139,7 @@ let cache_store_route = []
 
 export function getRouteFilePath(text) {
     let cache_key = text.replace(/['"]/g, '')
-    let list      = checkCache(cache_store_route, cache_key)
+    let list = checkCache(cache_store_route, cache_key)
 
     if (!list.length) {
         let info = extractController(cache_key)
@@ -147,7 +148,7 @@ export function getRouteFilePath(text) {
             return []
         }
 
-        let {uri: url, action, method: urlType} = info
+        let { uri: url, action, method: urlType } = info
 
         if (action == 'Closure') {
             return []
@@ -158,12 +159,12 @@ export function getRouteFilePath(text) {
 
         if (action.includes('@')) {
             let arr = action.split('@')
-            method  = arr[1]
+            method = arr[1]
 
             let namespace = arr[0].split('\\')
-            controller    = namespace.pop()
+            controller = namespace.pop()
         } else {
-            let arr    = action.split('\\')
+            let arr = action.split('\\')
             controller = arr.pop()
         }
 
@@ -177,15 +178,15 @@ export function getRouteFilePath(text) {
 
         // controller
         list.push({
-            tooltip : action,
-            fileUri : Uri.parse(`${scheme}?${args}`)
+            tooltip: action,
+            fileUri: Uri.parse(`${scheme}?${args}`)
         })
 
         // browser
         if (urlType.includes('GET') && app_url) {
             list.push({
-                tooltip : `${app_url}${url}`,
-                fileUri : Uri.parse(`${app_url}${url}`)
+                tooltip: `${app_url}${url}`,
+                fileUri: Uri.parse(`${app_url}${url}`)
             })
         }
 
@@ -204,8 +205,8 @@ async function getRoutesInfo(file) {
 
     try {
         let res = await exec(cmnd, {
-            cwd   : workspace.getWorkspaceFolder(file)?.uri.fsPath,
-            shell : env.shell
+            cwd: workspace.getWorkspaceFolder(file)?.uri.fsPath,
+            shell: env.shell
         })
 
         routes_contents = JSON.parse(res.stdout)
@@ -229,8 +230,8 @@ function extractController(k) {
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder : 'project APP_URL',
-        value       : await env.clipboard.readText() || '',
+        placeHolder: 'project APP_URL',
+        value: await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name'
@@ -250,47 +251,41 @@ export async function saveAppURL() {
 /* Scroll ------------------------------------------------------------------- */
 export function scrollToText(args) {
     if (args !== undefined) {
-        let {path, query} = args
+        let { path, query } = args
 
         commands.executeCommand('vscode.open', Uri.file(path))
-            .then(() => {
-                setTimeout(() => {
-                    let editor = window.activeTextEditor
-                    let range  = getTextPosition(query, editor.document)
+            .then(async () => {
+                let editor = window.activeTextEditor
+                let symbolsList: DocumentSymbol[] = await commands.executeCommand("vscode.executeDocumentSymbolProvider", editor.document.uri)
+                let range = await getRange(query, symbolsList)
 
-                    if (range) {
-                        editor.selection = new Selection(range.start, range.end)
-                        editor.revealRange(range, 2)
-                    }
+                if (range) {
+                    editor.selection = new Selection(range.start, range.end)
+                    editor.revealRange(range, TextEditorRevealType.InCenter)
+                }
 
-                    if (!range && query) {
-                        window.showInformationMessage(
-                            'Laravel Goto Controller: Copy Method Name To Clipboard',
-                            ...['Copy']
-                        ).then((e) => {
-                            if (e) {
-                                env.clipboard.writeText(query)
-                            }
-                        })
-                    }
-                }, config.waitB4Scroll)
+                if (!range && query) {
+                    window.showInformationMessage(
+                        'Laravel Goto Controller: Copy Method Name To Clipboard',
+                        ...['Copy']
+                    ).then((e) => {
+                        if (e) {
+                            env.clipboard.writeText(query)
+                        }
+                    })
+                }
             })
     }
 }
 
-function getTextPosition(searchFor, doc) {
-    if (searchFor) {
-        const regex = new RegExp('function ' + escapeStringRegexp(`${searchFor}(`))
-        const match = regex.exec(doc.getText())
+async function getRange(query, symbolsList) {
+    let node = symbolsList.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Class)
 
-        if (match) {
-            let pos = doc.positionAt(match.index + match[0].length)
+    if (node) {
+        node = node.children.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Method && symbol.name === query)
 
-            return new Range(pos, pos)
-        }
+        return node.location.range
     }
-
-    return null
 }
 
 /* Helpers ------------------------------------------------------------------ */
@@ -305,8 +300,8 @@ function saveCache(cache_store, text, val) {
     checkCache(cache_store, text).length
         ? false
         : cache_store.push({
-            key : text,
-            val : val
+            key: text,
+            val: val
         })
 
     return val
@@ -324,5 +319,5 @@ export function readConfig() {
 
     classmap_file_path = config.classmap_file
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
-    route_methods      = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
+    route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
 }

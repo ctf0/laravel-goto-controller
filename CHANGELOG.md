@@ -84,3 +84,8 @@
 
 - fix link popup not being clickable
 - use a cmnd instead of the uri handler
+
+## 0.4.1
+
+- remove `waitB4Scroll` config
+- use symbol provider to correctly navigate to action
