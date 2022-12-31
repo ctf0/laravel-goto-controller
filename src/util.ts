@@ -1,6 +1,7 @@
-'use strict'
+'use strict';
 
 import escapeStringRegexp from 'escape-string-regexp';
+import { execaCommand } from 'execa';
 import {
     commands,
     DocumentSymbol,
@@ -11,313 +12,291 @@ import {
     TextEditorRevealType,
     Uri,
     window,
-    workspace
+    workspace,
 } from 'vscode';
 
-const fs = require('fs')
-const path = require('path')
-const sep = path.sep
-export const cmndName = 'lgc.openFile'
-const scheme = `command:${cmndName}`
+const fs = require('fs');
+const path = require('path');
+const sep = path.sep;
+export const cmndName = 'lgc.openFile';
+const scheme = `command:${cmndName}`;
 
-export const clearAll = new EventEmitter()
+export const clearAll = new EventEmitter();
 
-let ws
+let ws = workspace.workspaceFolders![0].uri.fsPath || '';
 
 export function setWs(uri) {
-    ws = workspace.getWorkspaceFolder(uri)?.uri.fsPath
+    ws = workspace.getWorkspaceFolder(uri)?.uri.fsPath;
 }
 
 /* Controllers ------------------------------------------------------------------ */
-let classmap_fileContents = ''
-let cache_store_controller = []
+let classmap_fileContents: any;
+let cache_store_controller = [];
 
 export function getControllerFilePaths(text) {
-    let info = text.replace(/['"]/g, '')
-    let list = checkCache(cache_store_controller, info)
+    const info = text.replace(/['"]/g, '');
+    const list = checkCache(cache_store_controller, info);
 
     if (!list.length) {
-        let controller
-        let method
+        let controller;
+        let method;
 
         if (info.includes('@')) {
-            let arr = info.split('@')
-            controller = arr[0]
-            method = arr[1]
+            const arr = info.split('@');
+            controller = arr[0];
+            method = arr[1];
         } else {
-            let arr = info.split('\\')
-            controller = arr.pop()
+            controller = info;
         }
 
         for (const path of getKeyLine(controller)) {
-            let args = prepareArgs({ path: normalizePath(`${ws}${path}`), query: method });
+            const args = prepareArgs({ path: path, query: method });
 
             list.push({
-                tooltip: path.replace(/^[\\\/]/g, ''),
-                fileUri: Uri.parse(`${scheme}?${args}`)
-            })
+                tooltip : path.replace(ws, ''),
+                fileUri : Uri.parse(`${scheme}?${args}`),
+            });
         }
 
         if (list.length) {
-            saveCache(cache_store_controller, info, list)
+            saveCache(cache_store_controller, info, list);
         }
     }
 
-    return list
+    return list;
 }
 
 function prepareArgs(args: object) {
     return encodeURIComponent(JSON.stringify([args]));
 }
 
-function normalizePath(path) {
-    return path
-        .replace(/\/+/g, '/')
-        .replace(/\+/g, '\\')
-}
 
-export async function listenToFileChanges(classmap_file, artisan_file, debounce) {
-    await getFileContent(classmap_file)
-    await getRoutesInfo(artisan_file)
+export async function listenToFileChanges(classmap_file, debounce) {
+    await runPhpCli(classmap_file);
+    await getRoutesInfo();
 
-    let watcher = workspace.createFileSystemWatcher(classmap_file_path)
+    const watcher = workspace.createFileSystemWatcher(config.classmap_file);
 
     watcher.onDidChange(
-        debounce(async function (e) {
-            await getFileContent(classmap_file)
-            await getRoutesInfo(artisan_file)
+        debounce(async (e) => {
+            await runPhpCli(classmap_file);
+            await getRoutesInfo();
 
-            cache_store_route = []
-            cache_store_controller = []
-        }, 500)
-    )
+            cache_store_route = [];
+            cache_store_controller = [];
+        }, 500),
+    );
 }
 
-function getKeyLine(k) {
-    let slash = '\\\\'
-    k = k.includes('\\') ? k.replace(/\\/g, slash) : `${slash}${k}`
-    let match = classmap_fileContents.match(new RegExp(`['"].*${escapeStringRegexp(k)}.*php['"]`, 'gm'))
-
-    if (match) {
-        let result = []
-
-        for (const item of match) {
-            let line = item
-            let file: any = line.match(new RegExp(/['"]\S+(?=php).*?['"]/))
-
-            if (file) {
-                file = file[0].replace(/['"]/g, '')
-                let path = line.includes('$baseDir')
-                    ? file
-                    : line.includes('$vendorDir')
-                        ? `${sep}vendor${sep}${file}`
-                        : null
-
-                result.push(path.replace(/[\\\/]+/g, sep))
-            }
-        }
-
-        return result
-    }
-
-    return []
+function getKeyLine(controller) {
+    return classmap_fileContents
+        ?.filter((item) => item.namespace.startsWith(controller))
+        ?.map((item) => item.file);
 }
 
-function getFileContent(file) {
-    if (file) {
-        return fs.readFile(file.path, 'utf8', (err, data) => {
-            classmap_fileContents = data
-        })
-    }
-}
 
 /* Routes ------------------------------------------------------------------- */
-const exec = require('await-exec')
-export let routes_contents = []
-export let app_url = ''
-let cache_store_route = []
+export let routes_contents = [];
+export let app_url = '';
+let cache_store_route = [];
 
 export function getRouteFilePath(text) {
-    let cache_key = text.replace(/['"]/g, '')
-    let list = checkCache(cache_store_route, cache_key)
+    const cache_key = text.replace(/['"]/g, '');
+    const list = checkCache(cache_store_route, cache_key);
 
     if (!list.length) {
-        let info = extractController(cache_key)
+        const info = extractController(cache_key);
 
         if (!info) {
-            return []
+            return [];
         }
 
-        let { uri: url, action, method: urlType } = info
+        const { uri: url, action, method: urlType } = info;
 
         if (action == 'Closure') {
-            return []
+            return [];
         }
 
-        let controller
-        let method
+        let controller;
+        let method;
 
         if (action.includes('@')) {
-            let arr = action.split('@')
-            method = arr[1]
+            const arr = action.split('@');
 
-            let namespace = arr[0].split('\\')
-            controller = namespace.pop()
+            controller = arr[0];
+            method = arr[1];
         } else {
-            let arr = action.split('\\')
-            controller = arr.pop()
+            controller = action;
         }
 
-        let path = getKeyLine(controller)[0]
+        const path = getKeyLine(controller)[0];
 
         if (!path) {
-            return []
+            return [];
         }
 
-        let args = prepareArgs({ path: normalizePath(`${ws}${path}`), query: method });
+        const args = prepareArgs({ path: path, query: method });
 
         // controller
         list.push({
-            tooltip: action,
-            fileUri: Uri.parse(`${scheme}?${args}`)
-        })
+            tooltip : action,
+            fileUri : Uri.parse(`${scheme}?${args}`),
+        });
 
         // browser
         if (urlType.includes('GET') && app_url) {
             list.push({
-                tooltip: `${app_url}${url}`,
-                fileUri: Uri.parse(`${app_url}${url}`)
-            })
+                tooltip : `${app_url}${url}`,
+                fileUri : Uri.parse(`${app_url}${url}`),
+            });
         }
 
-        saveCache(cache_store_route, cache_key, list)
+        saveCache(cache_store_route, cache_key, list);
     }
 
-    return list
+    return list;
 }
 
-let counter = 1
+let counter = 1;
 
-async function getRoutesInfo(file) {
-    let timer
-
-    let cmnd = `${config.phpCommand} ${config.routeListCommand}`
+async function getRoutesInfo() {
+    let timer;
 
     try {
-        let res = await exec(cmnd, {
-            cwd: workspace.getWorkspaceFolder(file)?.uri.fsPath,
-            shell: env.shell
-        })
+        const { stdout } = await execaCommand(`${config.phpCommand} ${config.routeListCommand}`, {
+            cwd   : ws,
+            shell : env.shell,
+        });
 
-        routes_contents = JSON.parse(res.stdout)
+        routes_contents = JSON.parse(stdout);
     } catch (error) {
         // console.error(error)
 
         if (counter >= 3) {
-            return clearTimeout(timer)
+            return clearTimeout(timer);
         }
 
         timer = setTimeout(() => {
-            counter++
-            getRoutesInfo(file)
-        }, 2000)
+            counter++;
+            getRoutesInfo();
+        }, 2000);
     }
 }
 
-function extractController(k) {
-    return routes_contents.find((e) => e.name == k)
+async function runPhpCli(file: Uri) {
+    const fPath = file.path.replace(`${ws}/`, '');
+
+    try {
+        const cmnd = `${config.phpCommand} -r 'echo json_encode(include("${fPath}"));'`;
+        const { stdout } = await execaCommand(cmnd, {
+            cwd   : ws,
+            shell : env.shell,
+        });
+
+        return classmap_fileContents = Object
+            .entries(JSON.parse(stdout))
+            .map(([key, value]) => ({
+                namespace : key,
+                // @ts-ignore
+                file      : value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
+            }));
+    } catch (error) {
+        // console.error(error);
+    }
+}
+
+function extractController(routeName) {
+    return routes_contents.find((e) => e.name == routeName);
 }
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder: 'project APP_URL',
-        value: await env.clipboard.readText() || '',
+        placeHolder : 'project APP_URL',
+        value       : await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
-                return 'you have to add a name'
+                return 'you have to add a name';
             } else {
-                return ''
+                return '';
             }
-        }
-    })
+        },
+    });
 
     if (app_url) {
-        app_url = app_url.endsWith(sep) ? app_url : `${app_url}${sep}`
-        clearAll.fire(clearAll)
+        app_url = app_url.endsWith(sep) ? app_url : `${app_url}${sep}`;
+        clearAll.fire(clearAll);
     }
 }
 
 
 /* Scroll ------------------------------------------------------------------- */
-export function scrollToText(args) {
+export function scrollToText(args = undefined) {
     if (args !== undefined) {
-        let { path, query } = args
+        const { path, query } = args;
 
         commands.executeCommand('vscode.open', Uri.file(path))
             .then(async () => {
-                let editor = window.activeTextEditor
-                let symbolsList: DocumentSymbol[] = await commands.executeCommand("vscode.executeDocumentSymbolProvider", editor.document.uri)
-                let range = await getRange(query, symbolsList)
+                const editor = window.activeTextEditor;
+                const symbolsList: DocumentSymbol[] = await commands.executeCommand("vscode.executeDocumentSymbolProvider", editor.document.uri);
+                const range = await getRange(query, symbolsList);
 
                 if (range) {
-                    editor.selection = new Selection(range.start, range.end)
-                    editor.revealRange(range, TextEditorRevealType.InCenter)
+                    editor.selection = new Selection(range.start, range.end);
+                    editor.revealRange(range, TextEditorRevealType.InCenter);
                 }
 
                 if (!range && query) {
                     window.showInformationMessage(
                         'Laravel Goto Controller: Copy Method Name To Clipboard',
-                        ...['Copy']
+                        ...['Copy'],
                     ).then((e) => {
                         if (e) {
-                            env.clipboard.writeText(query)
+                            env.clipboard.writeText(query);
                         }
-                    })
+                    });
                 }
-            })
+            });
     }
 }
 
 async function getRange(query, symbolsList) {
-    let node = symbolsList.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Class)
+    let node = symbolsList.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Class);
 
     if (node) {
-        node = node.children.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Method && symbol.name === query)
+        node = node.children.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Method && symbol.name === query);
 
-        return node.location.range
+        return node.location.range;
     }
 }
 
 /* Helpers ------------------------------------------------------------------ */
 
 function checkCache(cache_store, text) {
-    let check = cache_store.find((e) => e.key == text)
+    const check = cache_store.find((e) => e.key == text);
 
-    return check ? check.val : []
+    return check ? check.val : [];
 }
 
 function saveCache(cache_store, text, val) {
     checkCache(cache_store, text).length
         ? false
         : cache_store.push({
-            key: text,
-            val: val
-        })
+            key : text,
+            val : val,
+        });
 
-    return val
+    return val;
 }
 
 /* Config ------------------------------------------------------------------- */
-export const PACKAGE_NAME = 'laravelGotoController'
-let config
-export let classmap_file_path: string = ''
-export let ignore_Controllers: string = ''
-export let route_methods: string = ''
+export const PACKAGE_NAME = 'laravelGotoController';
+export let config;
+export let ignore_Controllers = '';
+export let route_methods = '';
 
 export function readConfig() {
-    config = workspace.getConfiguration(PACKAGE_NAME)
+    config = workspace.getConfiguration(PACKAGE_NAME);
 
-    classmap_file_path = config.classmap_file
-    ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|')
-    route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|')
+    ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|');
+    route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|');
 }

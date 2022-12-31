@@ -89,3 +89,10 @@
 
 - remove `waitB4Scroll` config
 - use symbol provider to correctly navigate to action
+
+## 0.4.5
+
+- update `laravelGotoController.routeListCommand` & `laravelGotoController.phpCommand`, plz update ur config
+- add new config `laravelGotoController.dockerVolumePath`
+- better api
+- update rdme

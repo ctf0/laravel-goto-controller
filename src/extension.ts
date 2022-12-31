@@ -1,79 +1,75 @@
-'use strict'
+'use strict';
 
+import debounce from 'lodash.debounce';
 import {
     commands,
     languages,
     window,
-    workspace
-} from 'vscode'
-import SharedLinkProvider from './providers/SharedLinkProvider'
-import { debounce } from 'lodash'
-import * as util from './util'
+    workspace,
+} from 'vscode';
+import SharedLinkProvider from './providers/SharedLinkProvider';
+import * as util from './util';
 
-let providers  = []
-let classmap_file
-let artisan_file
+let providers = [];
+let classmap_file;
 
-export async function activate({subscriptions}) {
-    util.readConfig()
+export async function activate({ subscriptions }) {
+    util.readConfig();
 
     // config
     workspace.onDidChangeConfiguration(async (e) => {
         if (e.affectsConfiguration(util.PACKAGE_NAME)) {
-            util.readConfig()
+            util.readConfig();
         }
-    })
+    });
 
     // controllers & routes
-    classmap_file = await workspace.findFiles(util.classmap_file_path, null, 1)
-    artisan_file  = await workspace.findFiles('artisan', null, 1)
-
-    classmap_file = classmap_file[0]
-    artisan_file  = artisan_file[0]
+    classmap_file = await workspace.findFiles(util.config.classmap_file, null, 1);
+    classmap_file = classmap_file[0];
 
     // init
-    init()
+    await init(subscriptions);
 
     // route app_url
-    subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL))
-    subscriptions.push(commands.registerCommand(util.cmndName, util.scrollToText))
+    subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL));
+    subscriptions.push(commands.registerCommand(util.cmndName, util.scrollToText));
 
     util.clearAll.event(async () => {
-        await clearAll()
-        initProviders()
-    })
+        await clearAll();
+        initProviders();
+    });
 }
 
-function init() {
+async function init(subscriptions) {
+    // file content changes
+    await util.listenToFileChanges(classmap_file, debounce);
+
     // links
-    initProviders()
-    window.onDidChangeActiveTextEditor(async (e) => {
-        await clearAll()
-        initProviders()
-    })
+    initProviders();
+    subscriptions.push(
+        window.onDidChangeActiveTextEditor(async (e) => {
+            await clearAll();
+            initProviders();
+        }),
+    );
 
     // scroll
-    util.scrollToText()
-
-    // file content changes
-    util.listenToFileChanges(classmap_file, artisan_file, debounce)
+    util.scrollToText();
 }
 
-const initProviders = debounce(function() {
-    providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()))
-}, 250)
+const initProviders = debounce(() => {
+    providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()));
+}, 250);
 
 function clearAll() {
     return new Promise((res, rej) => {
-        providers.map((e) => e.dispose())
-        providers = []
+        providers.map((e) => e.dispose());
+        providers = [];
 
-        setTimeout(() => {
-            return res(true)
-        }, 500)
-    })
+        setTimeout(() => res(true), 500);
+    });
 }
 
 export function deactivate() {
-    clearAll()
+    clearAll();
 }

@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.4.1",
+    "version": "0.4.5",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.68.0"
@@ -19,6 +19,7 @@
         "file navigation"
     ],
     "activationEvents": [
+        "workspaceContains:composer.json",
         "onUri",
         "onLanguage:php",
         "onLanguage:blade",
@@ -73,13 +74,18 @@
                 },
                 "laravelGotoController.phpCommand": {
                     "type": "string",
-                    "default": "php artisan",
-                    "description": "the php command to use for getting the routes list (any quotes needs to be escaped)"
+                    "default": "php",
+                    "description": "the php command path (any quotes needs to be escaped)"
                 },
                 "laravelGotoController.routeListCommand": {
                     "type": "string",
-                    "default": "route:list --columns=uri,name,action,method --json",
+                    "default": "artisan route:list --columns=uri,name,action,method --json",
                     "description": "the route list cmnd (any quotes needs to be escaped)"
+                },
+                "laravelGotoController.dockerVolumePath": {
+                    "type": "string",
+                    "default": "/var/www/html",
+                    "description": "if using docker, this should be the main container volume path (defaults to laravel/sail)"
                 }
             }
         }
@@ -89,21 +95,17 @@
         "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-        "watch": "npm run vscode:prepublish",
-        "test-compile": "tsc -p ./"
+        "watch": "npm run vscode:prepublish"
     },
     "devDependencies": {
-        "@types/glob": "^8.0.0",
-        "@types/node": "^18.11.9",
+        "@types/node": "^18.11.18",
         "@types/vscode": "^1.68.0",
-        "esbuild": "^0.15.13",
-        "glob": "^8.0.3",
-        "tslint": "^6.1.3",
-        "typescript": "^4.8.4"
+        "esbuild": "^0.16.12",
+        "typescript": "^4.9.4"
     },
     "dependencies": {
-        "await-exec": "^0.1.2",
         "escape-string-regexp": "^5.0.0",
-        "lodash": "^4.17.21"
+        "execa": "^6.1.0",
+        "lodash.debounce": "^4.0.8"
     }
 }

@@ -33,8 +33,8 @@
 >
 >```json
 >// v8-
->"laravelGotoController.routeListCommand": "route:list --columns=uri,name,action,method --json",
+>"laravelGotoController.routeListCommand": "artisan route:list --columns=uri,name,action,method --json",
 >
 >// v9+
->"laravelGotoController.routeListCommand": "route:list --json",
+>"laravelGotoController.routeListCommand": "artisan route:list --json",
 >```
