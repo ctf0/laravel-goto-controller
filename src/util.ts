@@ -2,6 +2,7 @@
 
 import escapeStringRegexp from 'escape-string-regexp';
 import { execaCommand } from 'execa';
+import path from 'node:path';
 import {
     commands,
     DocumentSymbol,
@@ -12,11 +13,10 @@ import {
     TextEditorRevealType,
     Uri,
     window,
-    workspace,
+    workspace
 } from 'vscode';
 
-const fs = require('fs');
-const path = require('path');
+
 const sep = path.sep;
 export const cmndName = 'lgc.openFile';
 const scheme = `command:${cmndName}`;
@@ -53,8 +53,8 @@ export function getControllerFilePaths(text) {
             const args = prepareArgs({ path: path, query: method });
 
             list.push({
-                tooltip : path.replace(ws, ''),
-                fileUri : Uri.parse(`${scheme}?${args}`),
+                tooltip: path.replace(ws, ''),
+                fileUri: Uri.parse(`${scheme}?${args}`),
             });
         }
 
@@ -139,15 +139,15 @@ export function getRouteFilePath(text) {
 
         // controller
         list.push({
-            tooltip : action,
-            fileUri : Uri.parse(`${scheme}?${args}`),
+            tooltip: action,
+            fileUri: Uri.parse(`${scheme}?${args}`),
         });
 
         // browser
         if (urlType.includes('GET') && app_url) {
             list.push({
-                tooltip : `${app_url}${url}`,
-                fileUri : Uri.parse(`${app_url}${url}`),
+                tooltip: `${app_url}${url}`,
+                fileUri: Uri.parse(`${app_url}${url}`),
             });
         }
 
@@ -164,8 +164,8 @@ async function getRoutesInfo() {
 
     try {
         const { stdout } = await execaCommand(`${config.phpCommand} ${config.routeListCommand}`, {
-            cwd   : ws,
-            shell : env.shell,
+            cwd: ws,
+            shell: env.shell,
         });
 
         routes_contents = JSON.parse(stdout);
@@ -189,16 +189,16 @@ async function runPhpCli(file: Uri) {
     try {
         const cmnd = `${config.phpCommand} -r 'echo json_encode(include("${fPath}"));'`;
         const { stdout } = await execaCommand(cmnd, {
-            cwd   : ws,
-            shell : env.shell,
+            cwd: ws,
+            shell: env.shell,
         });
 
         return classmap_fileContents = Object
             .entries(JSON.parse(stdout))
             .map(([key, value]) => ({
-                namespace : key,
+                namespace: key,
                 // @ts-ignore
-                file      : value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
+                file: value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
             }));
     } catch (error) {
         // console.error(error);
@@ -211,8 +211,8 @@ function extractController(routeName) {
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder : 'project APP_URL',
-        value       : await env.clipboard.readText() || '',
+        placeHolder: 'project APP_URL',
+        value: await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name';
@@ -281,8 +281,8 @@ function saveCache(cache_store, text, val) {
     checkCache(cache_store, text).length
         ? false
         : cache_store.push({
-            key : text,
-            val : val,
+            key: text,
+            val: val,
         });
 
     return val;
@@ -294,8 +294,8 @@ export let config;
 export let ignore_Controllers = '';
 export let route_methods = '';
 
-export function readConfig() {
-    config = workspace.getConfiguration(PACKAGE_NAME);
+export async function readConfig() {
+    config = await workspace.getConfiguration(PACKAGE_NAME);
 
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|');
     route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|');

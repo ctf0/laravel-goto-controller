@@ -5,7 +5,7 @@ import {
     commands,
     languages,
     window,
-    workspace,
+    workspace
 } from 'vscode';
 import SharedLinkProvider from './providers/SharedLinkProvider';
 import * as util from './util';
@@ -14,12 +14,12 @@ let providers = [];
 let classmap_file;
 
 export async function activate({ subscriptions }) {
-    util.readConfig();
+    await util.readConfig();
 
     // config
     workspace.onDidChangeConfiguration(async (e) => {
         if (e.affectsConfiguration(util.PACKAGE_NAME)) {
-            util.readConfig();
+            await util.readConfig();
         }
     });
 
