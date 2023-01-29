@@ -4,7 +4,7 @@ import {
     DocumentLink,
     DocumentLinkProvider,
     TextDocument,
-    window,
+    window
 } from 'vscode';
 import * as util from '../util';
 
@@ -19,12 +19,12 @@ export default class LinkProvider implements DocumentLinkProvider {
 
     async provideDocumentLinks(doc: TextDocument): Promise<DocumentLink[]> {
         const editor = window.activeTextEditor;
+        const links: any = [];
 
         if (editor) {
             util.setWs(doc.uri);
 
             const text = doc.getText();
-            const links = [];
 
             /* Routes ------------------------------------------------------------------- */
 
@@ -34,7 +34,8 @@ export default class LinkProvider implements DocumentLinkProvider {
             for (const match of route_matches) {
                 const prim = match[0];
                 const found = match[2];
-                let i = match.index;
+                // @ts-ignore
+                let i: number = match.index;
 
                 if (prim != found) {
                     i = (i + prim.length) - found.length;
@@ -67,6 +68,7 @@ export default class LinkProvider implements DocumentLinkProvider {
                 if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
                     const files: any = await util.getControllerFilePaths(found);
                     const range = doc.getWordRangeAtPosition(
+                        // @ts-ignore
                         doc.positionAt(match.index),
                         reg_controller,
                     );
@@ -81,8 +83,8 @@ export default class LinkProvider implements DocumentLinkProvider {
                     }
                 }
             }
-
-            return links;
         }
+
+        return links
     }
 }

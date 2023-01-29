@@ -96,3 +96,7 @@
 - add new config `laravelGotoController.dockerVolumePath`
 - better api
 - update rdme
+
+## 0.4.7
+
+- fix error
