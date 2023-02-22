@@ -10,7 +10,7 @@ import {
 import SharedLinkProvider from './providers/SharedLinkProvider';
 import * as util from './util';
 
-let providers = [];
+let providers: any = [];
 let classmap_file;
 
 export async function activate({ subscriptions }) {
@@ -25,6 +25,12 @@ export async function activate({ subscriptions }) {
 
     // controllers & routes
     classmap_file = await workspace.findFiles(util.config.classmap_file, null, 1);
+
+    if (!classmap_file.length) {
+        return
+    }
+
+
     classmap_file = classmap_file[0];
 
     // init

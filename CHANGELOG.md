@@ -100,3 +100,7 @@
 ## 0.4.7
 
 - fix error
+
+## 0.4.8
+
+- fix error 'Activating extension 'ctf0.laravel-goto-controller' failed: Cannot read properties of undefined (reading 'path').'
