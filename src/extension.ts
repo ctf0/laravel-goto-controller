@@ -5,7 +5,7 @@ import {
     commands,
     languages,
     window,
-    workspace
+    workspace,
 } from 'vscode';
 import SharedLinkProvider from './providers/SharedLinkProvider';
 import * as util from './util';
@@ -14,20 +14,22 @@ let providers: any = [];
 let classmap_file;
 
 export async function activate({ subscriptions }) {
-    await util.readConfig();
+    util.readConfig();
 
     // config
-    workspace.onDidChangeConfiguration(async (e) => {
-        if (e.affectsConfiguration(util.PACKAGE_NAME)) {
-            await util.readConfig();
-        }
-    });
+    subscriptions.push(
+        workspace.onDidChangeConfiguration((e) => {
+            if (e.affectsConfiguration(util.PACKAGE_NAME)) {
+                util.readConfig();
+            }
+        }),
+    );
 
     // controllers & routes
     classmap_file = await workspace.findFiles(util.config.classmap_file, null, 1);
 
     if (!classmap_file.length) {
-        return
+        return;
     }
 
 
@@ -37,8 +39,10 @@ export async function activate({ subscriptions }) {
     await init(subscriptions);
 
     // route app_url
-    subscriptions.push(commands.registerCommand('lgc.addAppUrl', util.saveAppURL));
-    subscriptions.push(commands.registerCommand(util.cmndName, util.scrollToText));
+    subscriptions.push(
+        commands.registerCommand('lgc.addAppUrl', util.saveAppURL),
+        commands.registerCommand(util.cmndName, util.scrollToText),
+    );
 
     util.clearAll.event(async () => {
         await clearAll();
