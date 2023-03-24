@@ -49,11 +49,11 @@ export function getControllerFilePaths(text) {
             controller = info;
         }
 
-        for (const path of getKeyLine(controller)) {
-            const args = prepareArgs({ path: path, query: method });
+        for (const filePath of getKeyLine(controller)) {
+            const args = prepareArgs({ filePath: filePath, query: method });
 
             list.push({
-                tooltip : path.replace(ws, ''),
+                tooltip : filePath.replace(ws, ''),
                 fileUri : Uri.parse(`${scheme}?${args}`),
             });
         }
@@ -90,7 +90,7 @@ export async function listenToFileChanges(classmap_file, debounce) {
 
 function getKeyLine(controller) {
     return classmap_fileContents
-        ?.filter((item) => item.namespace.startsWith(controller))
+        ?.filter((item) => item.namespace.startsWith(controller) || item.namespace.endsWith(controller))
         ?.map((item) => item.file);
 }
 
@@ -232,28 +232,31 @@ export async function saveAppURL() {
 /* Scroll ------------------------------------------------------------------- */
 export function scrollToText(args = undefined) {
     if (args !== undefined) {
-        const { path, query } = args;
+        const { filePath, query } = args;
 
-        commands.executeCommand('vscode.open', Uri.file(path))
+        commands.executeCommand('vscode.open', Uri.file(filePath))
             .then(async () => {
                 const editor = window.activeTextEditor;
-                const symbolsList: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', editor.document.uri);
-                const range = await getRange(query, symbolsList);
 
-                if (range) {
-                    editor.selection = new Selection(range.start, range.end);
-                    editor.revealRange(range, TextEditorRevealType.InCenter);
-                }
+                if (editor) {
+                    const symbolsList: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', editor.document.uri);
+                    const range = await getRange(query, symbolsList);
 
-                if (!range && query) {
-                    window.showInformationMessage(
-                        'Laravel Goto Controller: Copy Method Name To Clipboard',
-                        ...['Copy'],
-                    ).then((e) => {
-                        if (e) {
-                            env.clipboard.writeText(query);
-                        }
-                    });
+                    if (range) {
+                        editor.selection = new Selection(range.start, range.end);
+                        editor.revealRange(range, TextEditorRevealType.InCenter);
+                    }
+
+                    if (!range && query) {
+                        window.showInformationMessage(
+                            'Laravel Goto Controller: Copy Method Name To Clipboard',
+                            ...['Copy'],
+                        ).then((e) => {
+                            if (e) {
+                                env.clipboard.writeText(query);
+                            }
+                        });
+                    }
                 }
             });
     }

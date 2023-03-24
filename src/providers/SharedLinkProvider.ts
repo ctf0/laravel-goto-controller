@@ -54,7 +54,7 @@ export default class LinkProvider implements DocumentLinkProvider {
 
             /* Controller --------------------------------------------------------------- */
 
-            const reg_controller = new RegExp(/['"]\S+(?=Controller)(.*?)(?<!\.php)['"]/, 'g');
+            const reg_controller = new RegExp(/(?<=['"])\S+(?=Controller)(.*?)(?<!\.php)(?=['"])/, 'g');
             const controller_matches = text.matchAll(reg_controller);
 
             for (const match of controller_matches) {
@@ -64,7 +64,7 @@ export default class LinkProvider implements DocumentLinkProvider {
                     const files: any = await util.getControllerFilePaths(found);
                     const range = doc.getWordRangeAtPosition(
                         // @ts-ignore
-                        doc.positionAt(match.index),
+                        doc.positionAt(match.index + found.length),
                         new RegExp(escapeStringRegexp(found)),
                     );
 

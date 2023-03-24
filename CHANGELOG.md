@@ -104,3 +104,7 @@
 ## 0.4.8
 
 - fix error 'Activating extension 'ctf0.laravel-goto-controller' failed: Cannot read properties of undefined (reading 'path').'
+
+## 0.5.1
+
+- fix not working correctly with `PhotoController@index`
