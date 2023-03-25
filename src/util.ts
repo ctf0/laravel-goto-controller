@@ -129,19 +129,15 @@ export function getRouteFilePath(text) {
             controller = action;
         }
 
-        const path = getKeyLine(controller)[0];
+        for (const filePath of getKeyLine(controller)) {
+            const args = prepareArgs({ filePath: filePath, query: method });
 
-        if (!path) {
-            return [];
+            // controller
+            list.push({
+                tooltip : action,
+                fileUri : Uri.parse(`${scheme}?${args}`),
+            });
         }
-
-        const args = prepareArgs({ path: path, query: method });
-
-        // controller
-        list.push({
-            tooltip : action,
-            fileUri : Uri.parse(`${scheme}?${args}`),
-        });
 
         // browser
         if (urlType.includes('GET') && app_url) {
