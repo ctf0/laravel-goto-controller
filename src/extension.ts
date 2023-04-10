@@ -32,7 +32,6 @@ export async function activate({ subscriptions }) {
         return;
     }
 
-
     classmap_file = classmap_file[0];
 
     // init

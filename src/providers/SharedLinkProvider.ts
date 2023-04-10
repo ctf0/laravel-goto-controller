@@ -29,12 +29,11 @@ export default class LinkProvider implements DocumentLinkProvider {
 
             /* Routes ------------------------------------------------------------------- */
 
-            const reg_route = new RegExp(`(?<=(${this.route_methods})\\()(?:.*?)(['"](.*?)['"])`, 'g');
+            const reg_route = new RegExp(`(?<=(${this.route_methods})\\()(['"](.*?)['"])`, 'g');
             const route_matches = text.matchAll(reg_route);
 
             for (const match of route_matches) {
                 const found = match[3];
-
                 const files: any = await util.getRouteFilePath(found);
                 const range = doc.getWordRangeAtPosition(
                     // @ts-ignore

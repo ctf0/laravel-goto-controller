@@ -89,9 +89,11 @@ export async function listenToFileChanges(classmap_file, debounce) {
 }
 
 function getKeyLine(controller) {
-    return classmap_fileContents
+    const list = classmap_fileContents
         ?.filter((item) => item.namespace.startsWith(controller) || item.namespace.endsWith(controller))
         ?.map((item) => item.file);
+
+    return list || [];
 }
 
 
@@ -172,9 +174,9 @@ async function getRoutesInfo() {
             return clearTimeout(timer);
         }
 
-        timer = setTimeout(() => {
+        timer = setTimeout(async () => {
             counter++;
-            getRoutesInfo();
+            await getRoutesInfo();
         }, 2000);
     }
 }

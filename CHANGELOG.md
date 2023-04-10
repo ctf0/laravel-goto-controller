@@ -108,3 +108,7 @@
 ## 0.5.1
 
 - fix not working correctly with `PhotoController@index`
+
+## 0.5.3
+
+- fix `ur is not a function or its return value is not iterable`
