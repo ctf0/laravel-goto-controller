@@ -1,5 +1,3 @@
-'use strict';
-
 import escapeStringRegexp from 'escape-string-regexp';
 import {
     DocumentLink,

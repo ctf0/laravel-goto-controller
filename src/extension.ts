@@ -1,5 +1,3 @@
-'use strict';
-
 import debounce from 'lodash.debounce';
 import {
     commands,

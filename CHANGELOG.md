@@ -112,3 +112,7 @@
 ## 0.5.3
 
 - fix `ur is not a function or its return value is not iterable`
+
+## 0.5.4
+
+- show output panel when phpcommand fails

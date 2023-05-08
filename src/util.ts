@@ -1,5 +1,3 @@
-'use strict';
-
 import escapeStringRegexp from 'escape-string-regexp';
 import { execaCommand } from 'execa';
 import path from 'node:path';
@@ -16,13 +14,13 @@ import {
     workspace,
 } from 'vscode';
 
-
 const sep = path.sep;
+
 export const cmndName = 'lgc.openFile';
 const scheme = `command:${cmndName}`;
-
+const PKG_LABEL = 'Laravel Goto';
+const outputChannel = window.createOutputChannel(PKG_LABEL, 'log');
 export const clearAll = new EventEmitter();
-
 let ws = workspace.workspaceFolders![0].uri.fsPath || '';
 
 export function setWs(uri) {
@@ -168,9 +166,13 @@ async function getRoutesInfo() {
 
         routes_contents = JSON.parse(stdout);
     } catch (error) {
-        // console.error(error)
+        // console.error(error);
 
         if (counter >= 3) {
+            outputChannel.clear();
+            outputChannel.appendLine(error.message);
+            outputChannel.show();
+
             return clearTimeout(timer);
         }
 
