@@ -18,7 +18,7 @@ const sep = path.sep;
 
 export const cmndName = 'lgc.openFile';
 const scheme = `command:${cmndName}`;
-const PKG_LABEL = 'Laravel Goto';
+const PKG_LABEL = 'Laravel Goto Controller';
 const outputChannel = window.createOutputChannel(PKG_LABEL, 'log');
 export const clearAll = new EventEmitter();
 let ws = workspace.workspaceFolders![0].uri.fsPath || '';
@@ -249,7 +249,7 @@ export function scrollToText(args = undefined) {
 
                     if (!range && query) {
                         window.showInformationMessage(
-                            'Laravel Goto Controller: Copy Method Name To Clipboard',
+                            `${PKG_LABEL}: Copy Method Name To Clipboard`,
                             ...['Copy'],
                         ).then((e) => {
                             if (e) {
