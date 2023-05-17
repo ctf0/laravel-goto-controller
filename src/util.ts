@@ -169,9 +169,8 @@ async function getRoutesInfo() {
         // console.error(error);
 
         if (counter >= 3) {
-            outputChannel.clear();
-            outputChannel.appendLine(error.message);
-            outputChannel.show();
+            outputChannel.replace(error.message);
+            // outputChannel.show();
 
             return clearTimeout(timer);
         }
