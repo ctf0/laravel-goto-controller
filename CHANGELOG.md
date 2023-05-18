@@ -116,3 +116,8 @@
 ## 0.5.4
 
 - show output panel when phpcommand fails
+
+## 0.6.0
+
+- better support for routes actions
+- update rdme

@@ -6,6 +6,7 @@ import {
     window,
 } from 'vscode';
 import * as util from '../util';
+import * as parser from './Parser';
 
 export default class LinkProvider implements DocumentLinkProvider {
     ignore_Controllers;
@@ -50,27 +51,32 @@ export default class LinkProvider implements DocumentLinkProvider {
             }
 
             /* Controller --------------------------------------------------------------- */
+            if (doc.languageId === 'php') {
+                const nodesList = parser.buildASTFromContent(text);
 
-            const reg_controller = new RegExp(/(?<=['"])\S+(?=Controller)(.*?)(?<!\.php)(?=['"])/, 'g');
-            const controller_matches = text.matchAll(reg_controller);
+                for (const item of nodesList) {
+                    let el = item[1];
+                    let action;
 
-            for (const match of controller_matches) {
-                const found = match[0];
+                    if (el.kind === 'array') {
+                        el = el.items[1];
+                        action = item[1].items[0].value.what.name + '@' + el.value.value;
+                        action = action.replace('\\', '');
+                    } else {
+                        action = el.value;
+                    }
 
-                if (!new RegExp(`['"](${this.ignore_Controllers})['"]`).test(found)) {
-                    const files: any = await util.getControllerFilePaths(found);
-                    const range = doc.getWordRangeAtPosition(
-                        // @ts-ignore
-                        doc.positionAt(match.index + found.length),
-                        new RegExp(escapeStringRegexp(found)),
-                    );
+                    if (!new RegExp(this.ignore_Controllers).test(action)) {
+                        const files: any = await util.getControllerFilePaths(action);
+                        const range = parser.getRangeFromLoc(el.loc.start, el.loc.end);
 
-                    if (files.length && range) {
-                        for (const file of files) {
-                            const documentlink: DocumentLink = new DocumentLink(range, file.fileUri);
-                            documentlink.tooltip = file.tooltip;
+                        if (files.length && range) {
+                            for (const file of files) {
+                                const documentlink: DocumentLink = new DocumentLink(range, file.fileUri);
+                                documentlink.tooltip = file.tooltip;
 
-                            links.push(documentlink);
+                                links.push(documentlink);
+                            }
                         }
                     }
                 }

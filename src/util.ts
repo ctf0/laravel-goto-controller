@@ -32,19 +32,22 @@ let classmap_fileContents: any;
 let cache_store_controller = [];
 
 export function getControllerFilePaths(text) {
-    const info = text.replace(/['"]/g, '');
-    const list = checkCache(cache_store_controller, info);
+    const list = checkCache(cache_store_controller, text);
 
     if (!list.length) {
         let controller;
         let method;
 
-        if (info.includes('@')) {
-            const arr = info.split('@');
+        if (text.includes('@')) {
+            const arr = text.split('@');
             controller = arr[0];
             method = arr[1];
         } else {
-            controller = info;
+            if (text.includes('Controller')) {
+                controller = text;
+            } else {
+                return getRouteFilePath(text, true);
+            }
         }
 
         for (const filePath of getKeyLine(controller)) {
@@ -57,7 +60,7 @@ export function getControllerFilePaths(text) {
         }
 
         if (list.length) {
-            saveCache(cache_store_controller, info, list);
+            saveCache(cache_store_controller, text, list);
         }
     }
 
@@ -67,7 +70,6 @@ export function getControllerFilePaths(text) {
 function prepareArgs(args: object) {
     return encodeURIComponent(JSON.stringify([args]));
 }
-
 
 export async function listenToFileChanges(classmap_file, debounce) {
     await runPhpCli(classmap_file);
@@ -88,7 +90,7 @@ export async function listenToFileChanges(classmap_file, debounce) {
 
 function getKeyLine(controller) {
     const list = classmap_fileContents
-        ?.filter((item) => item.namespace.startsWith(controller) || item.namespace.endsWith(controller))
+        ?.filter((item) => item.namespace.endsWith(controller) || item.namespace == controller)
         ?.map((item) => item.file);
 
     return list || [];
@@ -100,51 +102,53 @@ export let routes_contents = [];
 export let app_url = '';
 let cache_store_route = [];
 
-export function getRouteFilePath(text) {
+export function getRouteFilePath(text, useAction = false) {
     const cache_key = text.replace(/['"]/g, '');
     const list = checkCache(cache_store_route, cache_key);
 
     if (!list.length) {
-        const info = extractController(cache_key);
+        const infoList: any = extractController(cache_key, useAction);
 
-        if (!info) {
+        if (!infoList.length) {
             return [];
         }
 
-        const { uri: url, action, method: urlType } = info;
+        for (const info of infoList) {
+            const { uri: url, action, method: urlType } = info;
 
-        if (action == 'Closure') {
-            return [];
-        }
+            if (action == 'Closure') {
+                return [];
+            }
 
-        let controller;
-        let method;
+            let controller;
+            let method;
 
-        if (action.includes('@')) {
-            const arr = action.split('@');
+            if (action.includes('@')) {
+                const arr = action.split('@');
 
-            controller = arr[0];
-            method = arr[1];
-        } else {
-            controller = action;
-        }
+                controller = arr[0];
+                method = arr[1];
+            } else {
+                controller = action;
+            }
 
-        for (const filePath of getKeyLine(controller)) {
-            const args = prepareArgs({ filePath: filePath, query: method });
+            for (const filePath of getKeyLine(controller)) {
+                const args = prepareArgs({ filePath: filePath, query: method });
 
-            // controller
-            list.push({
-                tooltip : action,
-                fileUri : Uri.parse(`${scheme}?${args}`),
-            });
-        }
+                // controller
+                list.push({
+                    tooltip : action,
+                    fileUri : Uri.parse(`${scheme}?${args}`),
+                });
+            }
 
-        // browser
-        if (urlType.includes('GET') && app_url) {
-            list.push({
-                tooltip : `${app_url}${url}`,
-                fileUri : Uri.parse(`${app_url}${url}`),
-            });
+            // browser
+            if (urlType.includes('GET') && app_url) {
+                list.push({
+                    tooltip : `${app_url}${url}`,
+                    fileUri : Uri.parse(`${app_url}${url}`),
+                });
+            }
         }
 
         saveCache(cache_store_route, cache_key, list);
@@ -204,8 +208,14 @@ async function runPhpCli(file: Uri) {
     }
 }
 
-function extractController(routeName) {
-    return routes_contents.find((e) => e.name == routeName);
+function extractController(text, useAction = false) {
+    return routes_contents.filter((e) => {
+        if (useAction) {
+            return e.action === text || e.action.endsWith(text);
+        }
+
+        return e.name == text;
+    });
 }
 
 export async function saveAppURL() {

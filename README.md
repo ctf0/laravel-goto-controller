@@ -8,9 +8,11 @@
 
 >- add method/action to clipboard if not found in controller ex."used through a trait"
 >- supports controller definitions like
->     - `Something\PhotoController`
->     - `PhotoController`
->     - `PhotoController@index`
+>     - Route::get('/', 'index'); // will have list of all controllers with the same action name
+>     - Route::get('/', [PhotoController::class, 'index']);
+>     - Route::get('/', 'PhotoController@index');
+>     - Route::get('/', 'Something\PhotoController@index');
+>     - Route::resource('/photo', 'PhotoController');
 
 - Routes
 
@@ -21,11 +23,11 @@
 
 ### Notes
 
-- controller have to be following the [laravel convention](https://laravel.com/docs/master/controllers)
-- `Closure` routes wont have a link
-- in order for controller link to redirect to the correct place
-    - make sure the `terminal.integrated.scrollback` is set to big number ex.`100000` or even more if you have a very long list, otherwise you might get redirected to wrong controller.
-    - if the controllers still doesnt show up in the popup, try restarting the editor
+- the controller has to be following the [laravel convention](https://laravel.com/docs/master/controllers)
+- `Closure` routes won't have a link
+- for the controller link to redirect to the correct place
+    - make sure the `terminal.integrated.scrollback` is set to a big number ex.`100000` or even more if you have a very long list, otherwise, you might get redirected to the wrong controller.
+    - if the controllers still doesn't show up in the popup, try restarting the editor
 
 > #### Laravel v9+
 >
