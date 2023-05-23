@@ -121,3 +121,7 @@
 
 - better support for routes actions
 - update rdme
+
+## 0.6.1
+
+- allow the extension to work regardless of parsing errors

@@ -49,7 +49,7 @@ export async function activate({ subscriptions }) {
 
 async function init(subscriptions) {
     // file content changes
-    await util.listenToFileChanges(classmap_file, debounce);
+    await util.listenToFileChanges(classmap_file, subscriptions);
 
     // links
     initProviders();

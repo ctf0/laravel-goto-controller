@@ -3,8 +3,9 @@ import * as vscode from 'vscode';
 
 const Parser = new PhpParser.Engine({
     parser: {
-        locations     : true,
-        extractTokens : true,
+        locations      : true,
+        extractTokens  : true,
+        suppressErrors : true,
     },
     ast: {
         withPositions: true,
@@ -28,7 +29,7 @@ export function buildASTFromContent(content: string) {
             });
     } catch (error) {
         // console.error(error);
-        throw new Error(error);
+        throw new Error(error.message);
     }
 }
 

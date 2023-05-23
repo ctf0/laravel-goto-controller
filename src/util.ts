@@ -1,5 +1,6 @@
 import escapeStringRegexp from 'escape-string-regexp';
 import { execaCommand } from 'execa';
+import debounce from 'lodash.debounce';
 import path from 'node:path';
 import {
     commands,
@@ -32,59 +33,65 @@ let classmap_fileContents: any;
 let cache_store_controller = [];
 
 export function getControllerFilePaths(text) {
-    const list = checkCache(cache_store_controller, text);
+    try {
+        const list = checkCache(cache_store_controller, text);
 
-    if (!list.length) {
-        let controller;
-        let method;
+        if (!list.length) {
+            let controller;
+            let method;
 
-        if (text.includes('@')) {
-            const arr = text.split('@');
-            controller = arr[0];
-            method = arr[1];
-        } else {
-            if (text.includes('Controller')) {
-                controller = text;
+            if (text.includes('@')) {
+                const arr = text.split('@');
+                controller = arr[0];
+                method = arr[1];
             } else {
-                return getRouteFilePath(text, true);
+                if (text.includes('Controller')) {
+                    controller = text;
+                } else {
+                    return getRouteFilePath(text, true);
+                }
+            }
+
+            for (const filePath of getKeyLine(controller)) {
+                const args = prepareArgs({ filePath: filePath, query: method });
+
+                list.push({
+                    tooltip : filePath.replace(ws, ''),
+                    fileUri : Uri.parse(`${scheme}?${args}`),
+                });
+            }
+
+            if (list.length) {
+                saveCache(cache_store_controller, text, list);
             }
         }
 
-        for (const filePath of getKeyLine(controller)) {
-            const args = prepareArgs({ filePath: filePath, query: method });
-
-            list.push({
-                tooltip : filePath.replace(ws, ''),
-                fileUri : Uri.parse(`${scheme}?${args}`),
-            });
-        }
-
-        if (list.length) {
-            saveCache(cache_store_controller, text, list);
-        }
+        return list;
+    } catch (error) {
+        outputChannel.replace(error.message);
     }
-
-    return list;
 }
 
 function prepareArgs(args: object) {
     return encodeURIComponent(JSON.stringify([args]));
 }
 
-export async function listenToFileChanges(classmap_file, debounce) {
+export async function listenToFileChanges(classmap_file, subscriptions) {
     await runPhpCli(classmap_file);
     await getRoutesInfo();
 
     const watcher = workspace.createFileSystemWatcher(config.classmap_file);
 
-    watcher.onDidChange(
-        debounce(async (e) => {
-            await runPhpCli(classmap_file);
-            await getRoutesInfo();
+    subscriptions.push(
+        watcher.onDidChange(
+            debounce(async (e) => {
+                await runPhpCli(classmap_file);
+                await getRoutesInfo();
 
-            cache_store_route = [];
-            cache_store_controller = [];
-        }, 500),
+                cache_store_route = [];
+                cache_store_controller = [];
+            }, 500),
+        ),
     );
 }
 

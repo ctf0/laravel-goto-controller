@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.68.0"
