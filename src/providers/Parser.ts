@@ -13,24 +13,31 @@ const Parser = new PhpParser.Engine({
 });
 
 export function buildASTFromContent(content: string) {
-    try {
-        return Parser
-            .parseCode(content, '*.php')
-            ?.children
-            ?.filter((item) => item.kind === 'expressionstatement')
-            ?.map((item) => {
-                const expression = item.expression;
+    return getNodes(Parser.parseCode(content, '*.php')?.children);
+}
 
-                if (expression.arguments.length > 1) {
-                    return expression.arguments;
-                }
+function getNodes(items) {
+    items = items?.filter((item) => item.kind === 'expressionstatement');
+    const list = [];
 
-                return expression.what.what.arguments;
-            });
-    } catch (error) {
-        // console.error(error);
-        throw new Error(error.message);
+    for (const item of items) {
+        const expression = item.expression;
+        const args = expression.arguments;
+
+        if (args.length > 1) {
+            list.push(args);
+            continue;
+        }
+
+        if (args.length === 1 && args[0].body?.children?.length) {
+            list.push(...getNodes(args[0].body?.children));
+            continue;
+        }
+
+        list.push(expression.what.what.arguments);
     }
+
+    return list;
 }
 
 export function getRangeFromLoc(start: { line: number; column: number; }, end: { line: number; column: number; }): vscode.Range {

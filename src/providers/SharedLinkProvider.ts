@@ -52,33 +52,43 @@ export default class LinkProvider implements DocumentLinkProvider {
 
             /* Controller --------------------------------------------------------------- */
             if (doc.languageId === 'php') {
-                const nodesList = parser.buildASTFromContent(text);
+                try {
+                    const nodesList = parser.buildASTFromContent(text);
 
-                for (const item of nodesList) {
-                    let el = item[1];
-                    let action;
+                    for (const item of nodesList) {
+                        let el = item[1];
 
-                    if (el.kind === 'array') {
-                        el = el.items[1];
-                        action = item[1].items[0].value.what.name + '@' + el.value.value;
-                        action = action.replace('\\', '');
-                    } else {
-                        action = el.value;
-                    }
+                        if (!el) {
+                            continue;
+                        }
 
-                    if (!new RegExp(this.ignore_Controllers).test(action)) {
-                        const files: any = await util.getControllerFilePaths(action);
-                        const range = parser.getRangeFromLoc(el.loc.start, el.loc.end);
+                        let action;
 
-                        if (files.length && range) {
-                            for (const file of files) {
-                                const documentlink: DocumentLink = new DocumentLink(range, file.fileUri);
-                                documentlink.tooltip = file.tooltip;
+                        if (el.kind === 'array') {
+                            action = el.items[0].value.what.name + '@' + el.items[1].value.value;
+                            action = action.replace('\\', '');
 
-                                links.push(documentlink);
+                            el = el.items[1];
+                        } else {
+                            action = el.value;
+                        }
+
+                        if (!new RegExp(this.ignore_Controllers).test(action)) {
+                            const files: any = await util.getControllerFilePaths(action);
+                            const range = parser.getRangeFromLoc(el.loc.start, el.loc.end);
+
+                            if (files.length && range) {
+                                for (const file of files) {
+                                    const documentlink: DocumentLink = new DocumentLink(range, file.fileUri);
+                                    documentlink.tooltip = file.tooltip;
+
+                                    links.push(documentlink);
+                                }
                             }
                         }
                     }
+                } catch (error) {
+                    console.error(error);
                 }
             }
         }

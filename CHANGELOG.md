@@ -125,3 +125,7 @@
 ## 0.6.1
 
 - allow the extension to work regardless of parsing errors
+
+## 0.6.2
+
+- fix https://github.com/ctf0/laravel-goto-controller/issues/7
