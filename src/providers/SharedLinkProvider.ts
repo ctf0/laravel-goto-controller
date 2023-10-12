@@ -63,9 +63,12 @@ export default class LinkProvider implements DocumentLinkProvider {
                         }
 
                         let action;
+                        const range = parser.getRangeFromLoc(el.loc.start, el.loc.end);
 
                         if (el.kind === 'array') {
-                            action = el.items[0].value.what.name + '@' + el.items[1].value.value;
+                            const method_separator = util.getMethodSeparator(doc.getText(range));
+
+                            action = el.items[0].value.what.name + method_separator + el.items[1].value.value;
                             action = action.replace('\\', '');
 
                             el = el.items[1];
@@ -73,9 +76,8 @@ export default class LinkProvider implements DocumentLinkProvider {
                             action = el.value;
                         }
 
-                        if (!new RegExp(this.ignore_Controllers).test(action)) {
+                        if (action && !new RegExp(this.ignore_Controllers).test(action)) {
                             const files: any = await util.getControllerFilePaths(action);
-                            const range = parser.getRangeFromLoc(el.loc.start, el.loc.end);
 
                             if (files.length && range) {
                                 for (const file of files) {

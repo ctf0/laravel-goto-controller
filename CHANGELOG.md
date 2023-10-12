@@ -129,3 +129,7 @@
 ## 0.6.2
 
 - fix https://github.com/ctf0/laravel-goto-controller/issues/7
+
+## 0.6.5
+
+- make method separator dynamic

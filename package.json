@@ -2,10 +2,10 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.6.2",
+    "version": "0.6.5",
     "publisher": "ctf0",
     "engines": {
-        "vscode": "^1.68.0"
+        "vscode": "^1.80.0"
     },
     "repository": "https://github.com/ctf0/laravel-goto-controller",
     "icon": "images/logo.png",
@@ -70,6 +70,19 @@
                     "uniqueItems": true,
                     "description": "don't match this controllers classes"
                 },
+                "laravelGotoController.methodSeparator": {
+                    "type": "array",
+                    "default": [
+                        "@",
+                        "::"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "description": "characters that separate the controller from action\n\nex.'FooController@method'"
+                },
                 "laravelGotoController.phpCommand": {
                     "type": "string",
                     "default": "php",
@@ -96,15 +109,15 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^18.15.6",
-        "@types/vscode": "^1.68.0",
-        "esbuild": "^0.17.12",
-        "typescript": "^5.0.2"
+        "@types/node": "^20.8.4",
+        "@types/vscode": "^1.80.0",
+        "esbuild": "^0.19.4",
+        "typescript": "^5.2.2"
     },
     "dependencies": {
         "escape-string-regexp": "^5.0.0",
-        "execa": "^7.1.1",
+        "execa": "^8.0.1",
         "lodash.debounce": "^4.0.8",
-        "php-parser": "^3.1.4"
+        "php-parser": "^3.1.5"
     }
 }

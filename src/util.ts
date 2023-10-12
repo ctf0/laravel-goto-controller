@@ -40,8 +40,10 @@ export function getControllerFilePaths(text) {
             let controller;
             let method;
 
-            if (text.includes('@')) {
-                const arr = text.split('@');
+            const method_separator = getMethodSeparator(text);
+
+            if (method_separator) {
+                const arr = text.split(method_separator);
                 controller = arr[0];
                 method = arr[1];
             } else {
@@ -129,9 +131,10 @@ export function getRouteFilePath(text, useAction = false) {
 
             let controller;
             let method;
+            const method_separator = getMethodSeparator(action);
 
-            if (action.includes('@')) {
-                const arr = action.split('@');
+            if (method_separator) {
+                const arr = action.split(method_separator);
 
                 controller = arr[0];
                 method = arr[1];
@@ -162,6 +165,10 @@ export function getRouteFilePath(text, useAction = false) {
     }
 
     return list;
+}
+
+export function getMethodSeparator(text: string): string | undefined {
+    return method_separators.find((separator) => text.includes(separator));
 }
 
 let counter = 1;
@@ -284,7 +291,7 @@ async function getRange(query, symbolsList) {
     if (node) {
         node = node.children.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Method && symbol.name === query);
 
-        return node.location.range;
+        return node?.location.range;
     }
 }
 
@@ -312,10 +319,12 @@ export const PACKAGE_NAME = 'laravelGotoController';
 export let config;
 export let ignore_Controllers = '';
 export let route_methods = '';
+let method_separators = [];
 
 export function readConfig() {
     config = workspace.getConfiguration(PACKAGE_NAME);
 
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|');
     route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|');
+    method_separators = config.methodSeparator;
 }
