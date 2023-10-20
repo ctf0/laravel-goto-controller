@@ -30,6 +30,8 @@ export async function activate({ subscriptions }) {
         return;
     }
 
+    util.setWs();
+
     classmap_file = classmap_file[0];
 
     // init

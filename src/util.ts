@@ -22,10 +22,18 @@ const scheme = `command:${cmndName}`;
 const PKG_LABEL = 'Laravel Goto Controller';
 const outputChannel = window.createOutputChannel(PKG_LABEL, 'log');
 export const clearAll = new EventEmitter();
-let ws = workspace.workspaceFolders![0].uri.fsPath || '';
+let ws = '';
 
-export function setWs(uri) {
-    ws = workspace.getWorkspaceFolder(uri)?.uri.fsPath;
+export function setWs(uri = null) {
+    if (uri) {
+        ws = workspace.getWorkspaceFolder(uri)?.uri.fsPath;
+    } else {
+        const folders = workspace.workspaceFolders;
+
+        if (folders?.length) {
+            ws = folders[0].uri.fsPath || '';
+        }
+    }
 }
 
 /* Controllers ------------------------------------------------------------------ */

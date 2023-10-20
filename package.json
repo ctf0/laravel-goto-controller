@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.80.0"
@@ -109,9 +109,9 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^20.8.4",
+        "@types/node": "^20.8.7",
         "@types/vscode": "^1.80.0",
-        "esbuild": "^0.19.4",
+        "esbuild": "^0.19.5",
         "typescript": "^5.2.2"
     },
     "dependencies": {
