@@ -133,3 +133,7 @@
 ## 0.6.5
 
 - make method separator dynamic
+
+## 0.6.7
+
+- use `__invoke` if no action is specified

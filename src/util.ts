@@ -57,6 +57,7 @@ export function getControllerFilePaths(text) {
             } else {
                 if (text.includes('Controller')) {
                     controller = text;
+                    method = '__invoke';
                 } else {
                     return getRouteFilePath(text, true);
                 }
@@ -66,8 +67,8 @@ export function getControllerFilePaths(text) {
                 const args = prepareArgs({ filePath: filePath, query: method });
 
                 list.push({
-                    tooltip : filePath.replace(ws, ''),
-                    fileUri : Uri.parse(`${scheme}?${args}`),
+                    tooltip: filePath.replace(ws, ''),
+                    fileUri: Uri.parse(`${scheme}?${args}`),
                 });
             }
 
@@ -148,6 +149,7 @@ export function getRouteFilePath(text, useAction = false) {
                 method = arr[1];
             } else {
                 controller = action;
+                method = '__invoke';
             }
 
             for (const filePath of getKeyLine(controller)) {
@@ -155,16 +157,16 @@ export function getRouteFilePath(text, useAction = false) {
 
                 // controller
                 list.push({
-                    tooltip : action,
-                    fileUri : Uri.parse(`${scheme}?${args}`),
+                    tooltip: action,
+                    fileUri: Uri.parse(`${scheme}?${args}`),
                 });
             }
 
             // browser
             if (urlType.includes('GET') && app_url) {
                 list.push({
-                    tooltip : `${app_url}${url}`,
-                    fileUri : Uri.parse(`${app_url}${url}`),
+                    tooltip: `${app_url}${url}`,
+                    fileUri: Uri.parse(`${app_url}${url}`),
                 });
             }
         }
@@ -186,8 +188,8 @@ async function getRoutesInfo() {
 
     try {
         const { stdout } = await execaCommand(`${config.phpCommand} ${config.routeListCommand}`, {
-            cwd   : ws,
-            shell : env.shell,
+            cwd: ws,
+            shell: env.shell,
         });
 
         routes_contents = JSON.parse(stdout);
@@ -214,16 +216,16 @@ async function runPhpCli(file: Uri) {
     try {
         const cmnd = `${config.phpCommand} -r 'echo json_encode(include("${fPath}"));'`;
         const { stdout } = await execaCommand(cmnd, {
-            cwd   : ws,
-            shell : env.shell,
+            cwd: ws,
+            shell: env.shell,
         });
 
         return classmap_fileContents = Object
             .entries(JSON.parse(stdout))
             .map(([key, value]) => ({
-                namespace : key,
+                namespace: key,
                 // @ts-ignore
-                file      : value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
+                file: value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
             }));
     } catch (error) {
         // console.error(error);
@@ -242,8 +244,8 @@ function extractController(text, useAction = false) {
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder : 'project APP_URL',
-        value       : await env.clipboard.readText() || '',
+        placeHolder: 'project APP_URL',
+        value: await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name';
@@ -271,7 +273,7 @@ export function scrollToText(args = undefined) {
 
                 if (editor) {
                     const symbolsList: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', editor.document.uri);
-                    const range = await getRange(query, symbolsList);
+                    const range = getRange(query, symbolsList);
 
                     if (range) {
                         editor.selection = new Selection(range.start, range.end);
@@ -293,7 +295,7 @@ export function scrollToText(args = undefined) {
     }
 }
 
-async function getRange(query, symbolsList) {
+function getRange(query, symbolsList) {
     let node = symbolsList.find((symbol: DocumentSymbol) => symbol.kind === SymbolKind.Class);
 
     if (node) {
@@ -315,8 +317,8 @@ function saveCache(cache_store, text, val) {
     checkCache(cache_store, text).length
         ? false
         : cache_store.push({
-            key : text,
-            val : val,
+            key: text,
+            val: val,
         });
 
     return val;

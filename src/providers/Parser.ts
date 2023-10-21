@@ -24,14 +24,16 @@ function getNodes(items) {
         const expression = item.expression;
         const args = expression.arguments;
 
-        if (args.length > 1) {
-            list.push(args);
-            continue;
-        }
+        if (args) {
+            if (args.length > 1) {
+                list.push(args);
+                continue;
+            }
 
-        if (args.length === 1 && args[0].body?.children?.length) {
-            list.push(...getNodes(args[0].body?.children));
-            continue;
+            if (args.length === 1 && args[0].body?.children?.length) {
+                list.push(...getNodes(args[0].body?.children));
+                continue;
+            }
         }
 
         list.push(expression.what.what.arguments);
