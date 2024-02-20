@@ -5,6 +5,7 @@ import {
     window,
     workspace,
 } from 'vscode';
+import RouteCompletionItemProvider from './providers/RouteCompletionItemProvider';
 import SharedLinkProvider from './providers/SharedLinkProvider';
 import * as util from './util';
 
@@ -56,7 +57,7 @@ async function init(subscriptions) {
     // links
     initProviders();
     subscriptions.push(
-        window.onDidChangeActiveTextEditor(async (e) => {
+        window.onDidChangeActiveTextEditor(async () => {
             await clearAll();
             initProviders();
         }),
@@ -68,10 +69,14 @@ async function init(subscriptions) {
 
 const initProviders = debounce(() => {
     providers.push(languages.registerDocumentLinkProvider(['php', 'blade'], new SharedLinkProvider()));
+
+    if (util.show_route_completion) {
+        providers.push(languages.registerCompletionItemProvider(['php', 'blade'], new RouteCompletionItemProvider()));
+    }
 }, 250);
 
 function clearAll() {
-    return new Promise((res, rej) => {
+    return new Promise((res) => {
         providers.map((e) => e.dispose());
         providers = [];
 

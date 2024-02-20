@@ -64,11 +64,11 @@ export function getControllerFilePaths(text) {
             }
 
             for (const filePath of getKeyLine(controller)) {
-                const args = prepareArgs({ filePath: filePath, query: method });
+                const args = prepareArgs({ filePath, query: method });
 
                 list.push({
-                    tooltip: filePath.replace(ws, ''),
-                    fileUri: Uri.parse(`${scheme}?${args}`),
+                    tooltip : filePath.replace(ws, ''),
+                    fileUri : Uri.parse(`${scheme}?${args}`),
                 });
             }
 
@@ -153,20 +153,20 @@ export function getRouteFilePath(text, useAction = false) {
             }
 
             for (const filePath of getKeyLine(controller)) {
-                const args = prepareArgs({ filePath: filePath, query: method });
+                const args = prepareArgs({ filePath, query: method });
 
                 // controller
                 list.push({
-                    tooltip: action,
-                    fileUri: Uri.parse(`${scheme}?${args}`),
+                    tooltip : action,
+                    fileUri : Uri.parse(`${scheme}?${args}`),
                 });
             }
 
             // browser
             if (urlType.includes('GET') && app_url) {
                 list.push({
-                    tooltip: `${app_url}${url}`,
-                    fileUri: Uri.parse(`${app_url}${url}`),
+                    tooltip : `${app_url}${url}`,
+                    fileUri : Uri.parse(`${app_url}${url}`),
                 });
             }
         }
@@ -188,8 +188,8 @@ async function getRoutesInfo() {
 
     try {
         const { stdout } = await execaCommand(`${config.phpCommand} ${config.routeListCommand}`, {
-            cwd: ws,
-            shell: env.shell,
+            cwd   : ws,
+            shell : env.shell,
         });
 
         routes_contents = JSON.parse(stdout);
@@ -216,16 +216,16 @@ async function runPhpCli(file: Uri) {
     try {
         const cmnd = `${config.phpCommand} -r 'echo json_encode(include("${fPath}"));'`;
         const { stdout } = await execaCommand(cmnd, {
-            cwd: ws,
-            shell: env.shell,
+            cwd   : ws,
+            shell : env.shell,
         });
 
         return classmap_fileContents = Object
             .entries(JSON.parse(stdout))
             .map(([key, value]) => ({
-                namespace: key,
+                namespace : key,
                 // @ts-ignore
-                file: value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
+                file      : value.startsWith(ws) ? value : value.replace(new RegExp(`^${config.dockerVolumePath}`, 'm'), ws),
             }));
     } catch (error) {
         // console.error(error);
@@ -244,8 +244,8 @@ function extractController(text, useAction = false) {
 
 export async function saveAppURL() {
     app_url = await window.showInputBox({
-        placeHolder: 'project APP_URL',
-        value: await env.clipboard.readText() || '',
+        placeHolder : 'project APP_URL',
+        value       : await env.clipboard.readText() || '',
         validateInput(v) {
             if (!v) {
                 return 'you have to add a name';
@@ -317,8 +317,8 @@ function saveCache(cache_store, text, val) {
     checkCache(cache_store, text).length
         ? false
         : cache_store.push({
-            key: text,
-            val: val,
+            key : text,
+            val : val,
         });
 
     return val;
@@ -330,6 +330,7 @@ export let config;
 export let ignore_Controllers = '';
 export let route_methods = '';
 let method_separators = [];
+export let show_route_completion: any = '';
 
 export function readConfig() {
     config = workspace.getConfiguration(PACKAGE_NAME);
@@ -337,4 +338,5 @@ export function readConfig() {
     ignore_Controllers = config.ignoreControllers.map((e) => escapeStringRegexp(e)).join('|');
     route_methods = config.routeMethods.map((e) => escapeStringRegexp(e)).join('|');
     method_separators = config.methodSeparator;
+    show_route_completion = config.showRouteCompletion;
 }

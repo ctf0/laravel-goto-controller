@@ -137,3 +137,7 @@
 ## 0.6.7
 
 - use `__invoke` if no action is specified
+
+## 0.6.8
+
+- put back `route name suggestions`
