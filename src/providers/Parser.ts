@@ -36,7 +36,7 @@ function getNodes(items) {
             }
         }
 
-        list.push(expression.what.what.arguments);
+        list.push(expression.what?.what?.arguments);
     }
 
     return list;

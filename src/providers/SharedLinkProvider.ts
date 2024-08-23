@@ -56,6 +56,10 @@ export default class LinkProvider implements DocumentLinkProvider {
                     const nodesList = parser.buildASTFromContent(text);
 
                     for (const item of nodesList) {
+                        if (!item) {
+                            continue;
+                        }
+
                         let el: any = item[1];
 
                         if (!el) {
