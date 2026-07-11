@@ -2,10 +2,10 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "0.6.9",
+    "version": "1.0.0",
     "publisher": "ctf0",
     "engines": {
-        "vscode": "^1.80.0"
+        "vscode": "^1.110.0"
     },
     "repository": "https://github.com/ctf0/laravel-goto-controller",
     "icon": "images/logo.png",
@@ -40,68 +40,62 @@
                 "laravelGotoController.classmap_file": {
                     "type": "string",
                     "default": "vendor/composer/autoload_classmap.php",
-                    "description": "the composer classmap file path (from project root)"
-                },
-                "laravelGotoController.showRouteCompletion": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "show route names autocomplete suggestion"
-                },
-                "laravelGotoController.routeMethods": {
-                    "type": "array",
-                    "default": [
-                        "route",
-                        "tenant_route",
-                        "action",
-                        "Route::has",
-                        "Route::is"
-                    ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "description": "routes methods to match"
-                },
-                "laravelGotoController.ignoreControllers": {
-                    "type": "array",
-                    "default": [
-                        "App\\\\Http\\\\Controllers\\\\Controller"
-                    ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "description": "don't match this controllers classes"
-                },
-                "laravelGotoController.methodSeparator": {
-                    "type": "array",
-                    "default": [
-                        "@",
-                        "::"
-                    ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "description": "characters that separate the controller from action\n\nex.'FooController@method'"
+                    "description": "Path to Composer's autoload_classmap.php, relative to the workspace root"
                 },
                 "laravelGotoController.phpCommand": {
                     "type": "string",
                     "default": "php",
-                    "description": "the php command path (any quotes needs to be escaped)"
+                    "description": "PHP command used to load routes and the Composer classmap"
                 },
                 "laravelGotoController.routeListCommand": {
                     "type": "string",
-                    "default": "artisan route:list --columns=uri,name,action,method --json",
-                    "description": "the route list cmnd (any quotes needs to be escaped)"
+                    "default": "artisan route:list --except-vendor --json",
+                    "description": "Command appended to phpCommand to output the Laravel route list as JSON"
+                },
+                "laravelGotoController.routeCacheTimeout": {
+                    "type": "number",
+                    "default": 2,
+                    "minimum": 1,
+                    "description": "How long to cache the Laravel route list, in minutes"
+                },
+                "laravelGotoController.displayMode": {
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ],
+                    "enumDescriptions": [
+                        "codeLens: Show route metadata as clickable CodeLenses",
+                        "lineDecoration: Show route metadata as a line decoration before the method",
+                        "hover: Show route metadata as a hover card when hovering over a method"
+                    ],
+                    "default": 2,
+                    "description": "How route metadata is displayed above controller methods"
+                },
+                "laravelGotoController.removeNamePrefix": {
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Prefixes to remove from route names when displaying route metadata"
                 },
                 "laravelGotoController.dockerVolumePath": {
                     "type": "string",
-                    "default": "/var/www/html",
-                    "description": "if using docker, this should be the main container volume path (defaults to laravel/sail)"
+                    "default": null,
+                    "example": "/var/www/html",
+                    "description": "Container path mapped to the workspace root when PHP runs in Docker"
+                },
+                "laravelGotoController.appUrl": {
+                    "type": "string",
+                    "default": "https://localhost",
+                    "description": "Base URL used when opening a route; the route URI is appended to it"
+                },
+                "laravelGotoController.lineDecorationStyles": {
+                    "type": "string",
+                    "default": "font-size: small; opacity: 0.5",
+                    "markdownDescription": "line decoration styles, `#laravelGotoController.displayMode#` must be `2`"
                 }
             }
         }
@@ -114,15 +108,13 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^22.5.0",
-        "@types/vscode": "^1.80.0",
-        "esbuild": "^0.23.1",
-        "typescript": "^5.5.4"
+        "@types/node": "^26.1.1",
+        "@types/vscode": "^1.110.0",
+        "esbuild": "^0.28.1",
+        "typescript": "^7.0.2"
     },
     "dependencies": {
-        "escape-string-regexp": "^5.0.0",
-        "execa": "^9.3.1",
-        "lodash.debounce": "^4.0.8",
-        "php-parser": "^3.1.5"
+        "execa": "^9.6.1",
+        "php-parser": "^3.7.0"
     }
 }
