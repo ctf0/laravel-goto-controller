@@ -10,8 +10,20 @@ export function changed(event: vscode.ConfigurationChangeEvent, ...keys: string[
     return keys.some((key) => event.affectsConfiguration(`${section}.${key}`))
 }
 
-export function getDisplayMode(): 1 | 2 | 3 {
-    return config().get<1 | 2 | 3>('displayMode', 1)
+export function getDisplayMode(): 0 | 1 | 2 {
+    return config().get<0 | 1 | 2>('displayMode', 0)
+}
+
+export function expandHoverVerbosity(): boolean {
+    return config().get<boolean>('expandHoverVerbosity', false)
+}
+
+export function showMiddlewarePath(): boolean {
+    return config().get<boolean>('showMiddlewarePath', true)
+}
+
+export function getRouteCopyPrefix(): string {
+    return config().get<string>('routeCopyPrefix')
 }
 
 export function getRemoveNamePrefix(): string[] {
@@ -26,10 +38,6 @@ export function getRouteListCommand(): string {
     return config().get<string>('routeListCommand', 'artisan route:list --columns=uri,name,action,method --json')
 }
 
-export function getRouteCacheTimeout(): number {
-    return config().get<number>('routeCacheTimeout', 5)
-}
-
 export function getClassmapFile(): string {
     return config().get<string>('classmap_file', 'vendor/composer/autoload_classmap.php')
 }
@@ -42,6 +50,22 @@ export function getAppUrl(): string {
     return config().get<string>('appUrl')?.replace(/\/+$/, '') || ''
 }
 
+export function getLineDecorationPosition(): number {
+    return config().get('lineDecorationPosition', 0)
+}
+
+export function getThrottle(): {method: string, caller: string} {
+    return config().get('throttle', {method: 'RateLimiter::for', caller: 'throttle:'})
+}
+
+export function getThrottleSearchExclude(): string[] {
+    return config().get<string[]>('throttleSearchExclude', ['**/{vendor,storage,node_modules,.*}/**'])
+}
+
 export function getLineDecorationStyles(): string {
     return config().get<string>('lineDecorationStyles')
+}
+
+export function getTabSize(document): number {
+    return vscode.workspace.getConfiguration('editor', document.uri).get<number | 'auto'>('tabSize')
 }

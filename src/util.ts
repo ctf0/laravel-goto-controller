@@ -1,23 +1,11 @@
 import path from 'node:path'
-import * as config from './Config'
-import type {Route} from './RouteCodeLensProvider'
+import * as config from './libs/Config'
 
 export function removeNamePrefix(name: string): string {
     const prefixes = config.getRemoveNamePrefix()
     const prefix = prefixes.find((item) => name.startsWith(item))
 
     return prefix ? name.slice(prefix.length) : name
-}
-
-export function renderRouteAttribute(route: Route): string {
-    const method = route.method.split('|')[0].toLowerCase()
-    const methodName = method.charAt(0).toUpperCase() + method.slice(1)
-
-    return `#[${methodName}(${quoteAttributeValue(route.url)}, name: ${quoteAttributeValue(removeNamePrefix(route.name))}, middleware: ${route.middleware.length === 1 ? quoteAttributeValue(route.middleware[0]) : '[]'}]`
-}
-
-export function quoteAttributeValue(value: string): string {
-    return `'${value.replace(/\\/g, '\\\\').replace(/'/g, '\\\'')}'`
 }
 
 export function resolveClassPath(filePath: string, cwd: string, dockerVolumePath?: string): string {
@@ -41,4 +29,8 @@ export function getRouteTarget(action: string): [string, string] {
 
 export function shellQuote(text: string): string {
     return `'${text.replace(/'/g, `'\\''`)}'`
+}
+
+export function resolveUrl(url: string): string {
+    return `/${url}`.replace('//', '/')
 }
