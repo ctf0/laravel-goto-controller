@@ -2,11 +2,14 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.110.0"
     },
+    "enabledApiProposals": [
+        "editorHoverVerbosityLevel"
+    ],
     "repository": "https://github.com/ctf0/laravel-goto-controller",
     "icon": "images/logo.png",
     "categories": [
@@ -22,7 +25,8 @@
         "workspaceContains:composer.json",
         "onLanguage:php",
         "onLanguage:blade",
-        "workspaceContains:artisan"
+        "workspaceContains:artisan",
+        "onCommand:lgc.showMiddleware"
     ],
     "main": "./out/main",
     "contributes": {
@@ -52,26 +56,36 @@
                     "default": "artisan route:list --except-vendor --json",
                     "description": "Command appended to phpCommand to output the Laravel route list as JSON"
                 },
-                "laravelGotoController.routeCacheTimeout": {
-                    "type": "number",
-                    "default": 2,
-                    "minimum": 1,
-                    "description": "How long to cache the Laravel route list, in minutes"
-                },
                 "laravelGotoController.displayMode": {
                     "type": "integer",
                     "enum": [
+                        0,
                         1,
-                        2,
-                        3
+                        2
                     ],
                     "enumDescriptions": [
+                        "none: Disable CodeLens and line decorations",
                         "codeLens: Show route metadata as clickable CodeLenses",
-                        "lineDecoration: Show route metadata as a line decoration before the method",
-                        "hover: Show route metadata as a hover card when hovering over a method"
+                        "lineDecoration: Show route metadata as a line decoration before the method"
                     ],
-                    "default": 2,
+                    "default": 1,
                     "description": "How route metadata is displayed above controller methods"
+                },
+                "laravelGotoController.expandHoverVerbosity": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Expand route metadata in the hover verbosity panel by default"
+                },
+                "laravelGotoController.showMiddlewarePath": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show middleware file paths in the picker"
+                },
+                "laravelGotoController.routeCopyPrefix": {
+                    "type": "string",
+                    "default": "@",
+                    "example": "route('@')",
+                    "description": "Prefix added when copying route names from the code lens. The '@' will be replaced with the route name"
                 },
                 "laravelGotoController.removeNamePrefix": {
                     "type": "array",
@@ -89,7 +103,11 @@
                 },
                 "laravelGotoController.appUrl": {
                     "type": "string",
-                    "default": "https://localhost",
+                    "default": null,
+                    "examples": [
+                        "http://localhost",
+                        "http://127.0.0.1"
+                    ],
                     "description": "Base URL used when opening a route; the route URI is appended to it"
                 },
                 "laravelGotoController.lineDecorationStyles": {
@@ -110,6 +128,7 @@
     "devDependencies": {
         "@types/node": "^26.1.1",
         "@types/vscode": "^1.110.0",
+        "@vscode/dts": "^0.4.1",
         "esbuild": "^0.28.1",
         "typescript": "^7.0.2"
     },

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
-import {getMethodsFromContent} from './Parser'
-import {getDisplayMode} from './Config'
-import {removeNamePrefix} from './util'
+import {getMethodsFromContent} from '../libs/Parser'
+import {getDisplayMode, getRouteCopyPrefix} from '../libs/Config'
+import {removeNamePrefix, resolveUrl} from '../util'
 
 export type Route = {
     method     : string
@@ -47,29 +47,34 @@ export class RouteCodeLensProvider implements vscode.CodeLensProvider {
                 }
 
                 renderedActions.add(route.action)
+
+                // url
                 lenses.push(new vscode.CodeLens(range, {
-                    title     : `method: ${route.method}`,
+                    title     : `${route.method}: ${resolveUrl(route.url)}`,
                     command   : 'lgc.routeActions',
+                    tooltip   : 'open/copy url',
                     arguments : [route],
                 }))
-                lenses.push(new vscode.CodeLens(range, {
-                    title     : `uri: ${route.url}`,
-                    command   : 'lgc.noAction',
-                    arguments : [route],
-                }))
+
+                // name
                 const name = removeNamePrefix(route.name)
 
                 if (name) {
                     lenses.push(new vscode.CodeLens(range, {
                         title     : `name: ${name}`,
-                        command   : 'lgc.noAction',
-                        arguments : [route],
+                        command   : 'lgc.copyToClipboard',
+                        tooltip   : 'copy',
+                        arguments : [getRouteCopyPrefix().replace('@', name)],
                     }))
                 }
 
+                // middleware
+                const singleMiddleware = route.middleware.length === 1
+
                 lenses.push(new vscode.CodeLens(range, {
-                    title     : `middleware: ${route.middleware.length === 1 ? route.middleware[0] : '[]'}`,
+                    title     : `middleware: ${singleMiddleware ? route.middleware[0] : '[...]'}`,
                     command   : 'lgc.showMiddleware',
+                    tooltip   : singleMiddleware ? '' : 'show list',
                     arguments : [route],
                 }))
             }

@@ -23,7 +23,7 @@ export function getMethodsFromContent(content: string, lines: number = 1): {name
         if (node.kind === 'method' && node.name?.name && node.loc?.start) {
             methods.push({
                 name     : node.name.name,
-                position : new vscode.Position(node.loc.start.line - lines, node.loc.start.column),
+                position : new vscode.Position((node.name.loc?.start.line ?? node.loc.start.line) - lines, node.loc.start.column),
             })
         }
     })

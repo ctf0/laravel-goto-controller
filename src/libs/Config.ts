@@ -10,8 +10,20 @@ export function changed(event: vscode.ConfigurationChangeEvent, ...keys: string[
     return keys.some((key) => event.affectsConfiguration(`${section}.${key}`))
 }
 
-export function getDisplayMode(): 1 | 2 | 3 {
-    return config().get<1 | 2 | 3>('displayMode', 1)
+export function getDisplayMode(): 0 | 1 | 2 {
+    return config().get<0 | 1 | 2>('displayMode', 0)
+}
+
+export function expandHoverVerbosity(): boolean {
+    return config().get<boolean>('expandHoverVerbosity', false)
+}
+
+export function showMiddlewarePath(): boolean {
+    return config().get<boolean>('showMiddlewarePath', true)
+}
+
+export function getRouteCopyPrefix(): string {
+    return config().get<string>('routeCopyPrefix')
 }
 
 export function getRemoveNamePrefix(): string[] {
@@ -24,10 +36,6 @@ export function getPhpCommand(): string {
 
 export function getRouteListCommand(): string {
     return config().get<string>('routeListCommand', 'artisan route:list --columns=uri,name,action,method --json')
-}
-
-export function getRouteCacheTimeout(): number {
-    return config().get<number>('routeCacheTimeout', 5)
 }
 
 export function getClassmapFile(): string {
@@ -44,4 +52,8 @@ export function getAppUrl(): string {
 
 export function getLineDecorationStyles(): string {
     return config().get<string>('lineDecorationStyles')
+}
+
+export function getTabSize(document): number {
+    return vscode.workspace.getConfiguration('editor', document.uri).get<number | 'auto'>('tabSize')
 }

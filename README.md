@@ -2,9 +2,20 @@
 
 - project have to be handled by **Composer**
 
-## v1.0.0
+> ## v1.0.0
 
-starting from v1, the extension will no longer do the below as [Official laravel extension](https://marketplace.visualstudio.com/items?itemName=laravel.vscode-laravel) already does that, instead i will be adding extra functionality that probably wont be added to the main extension.
+starting from v1.+, the extension will no longer do the below as [Official laravel extension](https://marketplace.visualstudio.com/items?itemName=laravel.vscode-laravel) already does that, instead i will be adding extra functionality that probably wont be added to the main extension.
+
+### New Features
+
+- show route details on controller action in 3 modes (`hover (always), code lens, line decoration`).
+    - both (hover & code lens) are clickable, line decoration is static.
+- you can view the mw info & directly jump to it, just like the Official extension.
+
+<br>
+<hr>
+<hr>
+<br>
 
 ## Features
 

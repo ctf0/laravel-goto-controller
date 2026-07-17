@@ -141,3 +141,13 @@
 ## 0.6.8
 
 - put back `route name suggestions`
+
+## 1.0.0
+
+- show controller action info in 3 modes
+
+## 1.0.1
+
+- make the hover provider info visible by default
+- we now show the mw details with jump to on click
+- better ux

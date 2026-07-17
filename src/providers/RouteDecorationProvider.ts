@@ -1,8 +1,10 @@
 import * as vscode from 'vscode'
 import type {Route} from './RouteCodeLensProvider'
-import {getMethodsFromContent} from './Parser'
-import * as config from './Config'
-import {renderRouteAttribute} from './util'
+import {middlewareLabel} from './RouteHoverProvider'
+import type {MiddlewareMap} from './RouteHoverProvider'
+import {getMethodsFromContent} from '../libs/Parser'
+import * as config from '../libs/Config'
+import {removeNamePrefix, resolveUrl} from '../util'
 
 export class RouteDecorationProvider implements vscode.Disposable {
     private readonly type = vscode.window.createTextEditorDecorationType({
@@ -16,6 +18,7 @@ export class RouteDecorationProvider implements vscode.Disposable {
     constructor(
         private readonly getRoutes: () => Promise<Route[]>,
         private readonly getClassMap: () => Promise<Map<string, string>>,
+        private readonly getMiddleware: () => Promise<MiddlewareMap>,
         private readonly isRouteForMethod: (route: Route, filePath: string, method: string) => boolean,
     ) {}
 
@@ -36,7 +39,11 @@ export class RouteDecorationProvider implements vscode.Disposable {
             return
         }
 
-        const [availableRoutes] = await Promise.all([this.getRoutes(), this.getClassMap()])
+        const [availableRoutes, , availableMiddleware] = await Promise.all([
+            this.getRoutes(),
+            this.getClassMap(),
+            this.getMiddleware(),
+        ])
         const decorations: vscode.DecorationOptions[] = []
         const renderedActions = new Set<string>()
 
@@ -51,12 +58,30 @@ export class RouteDecorationProvider implements vscode.Disposable {
                 decorations.push({
                     range         : new vscode.Range(method.position, method.position),
                     renderOptions : {
-                        before : {contentText: renderRouteAttribute(route)},
+                        before : {contentText: this.renderRouteAttribute(route, availableMiddleware)},
                     },
                 })
             }
         }
 
         editor.setDecorations(this.type, decorations)
+    }
+
+    renderRouteAttribute(route: Route, middlewareMap: MiddlewareMap): string {
+        const method = route.method.split('|')[0].toLowerCase()
+        const methodName = method.charAt(0).toUpperCase() + method.slice(1)
+        const middlewareNames = route.middleware
+            .map((name) => middlewareLabel(middlewareMap, name))
+            .filter((name) => !name.includes('\\'))
+        const hasHiddenMiddleware = middlewareNames.length < route.middleware.length
+        const middleware = route.middleware.length === 1
+            ? this.quoteAttributeValue(middlewareLabel(middlewareMap, route.middleware[0]))
+            : `[${[...middlewareNames, ...(hasHiddenMiddleware ? ['...'] : [])].join(', ')}]`
+
+        return `#[${methodName}(${this.quoteAttributeValue(resolveUrl(route.url))}, name:${this.quoteAttributeValue(removeNamePrefix(route.name))}, middleware:${middleware}]`
+    }
+
+    quoteAttributeValue(value: string): string {
+        return `'${value.replace(/\\/g, '\\\\').replace(/'/g, '\\\'')}'`
     }
 }
