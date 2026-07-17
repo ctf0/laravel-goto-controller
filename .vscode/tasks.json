@@ -9,7 +9,10 @@
             },
             "isBackground": true,
             "presentation": {
-                "reveal": "always"
+                "panel": "shared",
+                "reveal": "silent",
+                "revealProblems": "onProblem",
+                "showReuseMessage": false
             },
             "problemMatcher": "$tsc-watch",
             "script": "watch",

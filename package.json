@@ -2,7 +2,7 @@
     "name": "laravel-goto-controller",
     "displayName": "Laravel Goto Controller",
     "description": "Quick jump to controller",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "publisher": "ctf0",
     "engines": {
         "vscode": "^1.110.0"
@@ -52,26 +52,36 @@
                     "default": "artisan route:list --except-vendor --json",
                     "description": "Command appended to phpCommand to output the Laravel route list as JSON"
                 },
-                "laravelGotoController.routeCacheTimeout": {
-                    "type": "number",
-                    "default": 2,
-                    "minimum": 1,
-                    "description": "How long to cache the Laravel route list, in minutes"
-                },
                 "laravelGotoController.displayMode": {
                     "type": "integer",
                     "enum": [
+                        0,
                         1,
-                        2,
-                        3
+                        2
                     ],
                     "enumDescriptions": [
+                        "none: Show nothing",
                         "codeLens: Show route metadata as clickable CodeLenses",
-                        "lineDecoration: Show route metadata as a line decoration before the method",
-                        "hover: Show route metadata as a hover card when hovering over a method"
+                        "lineDecoration: Show route metadata as a line decoration"
                     ],
-                    "default": 2,
-                    "description": "How route metadata is displayed above controller methods"
+                    "default": 1,
+                    "description": "How route metadata is displayed for controller actions/methods"
+                },
+                "laravelGotoController.expandHoverVerbosity": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Expand route metadata in the hover verbosity panel by default"
+                },
+                "laravelGotoController.showMiddlewarePath": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show middleware file paths in the picker"
+                },
+                "laravelGotoController.routeCopyPrefix": {
+                    "type": "string",
+                    "default": "@",
+                    "example": "route('@')",
+                    "description": "Prefix added when copying route names from the code lens. The '@' will be replaced with the route name"
                 },
                 "laravelGotoController.removeNamePrefix": {
                     "type": "array",
@@ -89,31 +99,60 @@
                 },
                 "laravelGotoController.appUrl": {
                     "type": "string",
-                    "default": "https://localhost",
+                    "default": null,
+                    "examples": [
+                        "http://localhost",
+                        "http://127.0.0.1"
+                    ],
                     "description": "Base URL used when opening a route; the route URI is appended to it"
+                },
+                "laravelGotoController.lineDecorationPosition": {
+                    "type": "number",
+                    "default": 0,
+                    "markdownDescription": "Position of the line decoration relative to the method, `#laravelGotoController.displayMode#` must be `2`.\n- 0 = (under) the method line\n- 1 = (on) the method line\n- 2 = (above) the method line"
                 },
                 "laravelGotoController.lineDecorationStyles": {
                     "type": "string",
-                    "default": "font-size: small; opacity: 0.5",
-                    "markdownDescription": "line decoration styles, `#laravelGotoController.displayMode#` must be `2`"
+                    "default": "font-size: small; opacity: 0.5; margin: 0 0.5em 0 0",
+                    "markdownDescription": "line decoration styles (require reloading on change), `#laravelGotoController.displayMode#` must be `2`.\n\ncheck [DecorationRenderOptions](https://code.visualstudio.com/api/references/vscode-api#ThemableDecorationAttachmentRenderOptions)"
+                },
+                "laravelGotoController.throttle": {
+                    "type": "object",
+                    "default": {
+                        "method": "RateLimiter::for",
+                        "caller": "throttle:"
+                    },
+                    "markdownDescription": "throttle method to call mapper"
+                },
+                "laravelGotoController.throttleSearchExclude": {
+                    "type": "array",
+                    "default": [
+                        "**/{vendor,storage,node_modules,.*}/**"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Glob patterns to exclude when scanning PHP files for `#laravelGotoController.throttle#`"
                 }
             }
         }
     },
     "scripts": {
         "vscode:prepublish": "npm run esbuild-base -- --pure:console.log --minify",
-        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --external:php-parser --external:execa --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^26.1.1",
+        "@types/node": "^26.1.2",
         "@types/vscode": "^1.110.0",
+        "@vscode/dts": "^0.4.1",
         "esbuild": "^0.28.1",
         "typescript": "^7.0.2"
     },
     "dependencies": {
+        "escape-string-regexp": "^5.0.0",
         "execa": "^9.6.1",
         "php-parser": "^3.7.0"
     }
